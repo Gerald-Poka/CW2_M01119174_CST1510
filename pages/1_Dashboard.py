@@ -40,7 +40,7 @@ def display_cyber_incidents_dashboard():
         selected_severity = st.selectbox('Severity Level', data['severity'].unique())
 
     # Convert timestamp column
-    data['timestamp'] = pd.to_datetime(data['timestamp'])
+    data['timestamp'] = pd.to_datetime(data['timestamp'], format='mixed')
 
     # Filter data by selected severity
     filtered_data = data[data['severity'] == selected_severity]

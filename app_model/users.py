@@ -198,6 +198,11 @@ def delete_user(conn, username):
 #A function to promote users role to admin
 def promote_user(conn, username):
     cursor = conn.cursor()
+    # Check if user exists
+    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+    user = cursor.fetchone()
+    if user is None:
+        return False, "Username does not exist"
     sql = """UPDATE users SET role = ? WHERE username = ?"""
     cursor.execute(sql, ("admin", username))
     conn.commit()

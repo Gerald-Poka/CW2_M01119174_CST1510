@@ -180,6 +180,16 @@ Provide a clear and helpful answer.
 
 
 # Streamlit chat page foundation
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+    st.write("Please log in to access the dashboard.")
+    if st.button("Go to Login Page"):
+        st.session_state.logged_in = False
+        st.switch_page("Home.py")
+    st.stop()
+
 st.title("Chat with your assistant")
 
 if "messages" not in st.session_state:
