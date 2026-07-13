@@ -227,3 +227,4 @@ def admin_change_password(conn, username):
     cursor.execute(sql, parameters)
     conn.commit()
     return cursor.rowcount > 0
+

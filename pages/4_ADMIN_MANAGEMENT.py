@@ -12,11 +12,15 @@ if not st.session_state.get("logged_in", False):
         st.session_state.logged_in = False
         st.switch_page("Home.py")
     st.stop()
+# Check if admin 
+if st.session_state.get("role") != "admin":
+    st.error("Access Denied. You do not have permission to view this page.")
+    if st.button("Go Back to Dashboard"):
+        st.switch_page("pages/1_Dashboard.py")
+    st.stop()
     
 st.title("ADMINISTRATOR MANAGEMENT SYSTEM")
 st.header("For Authorized personels only")
-#request for admin password input
-admin_password = st.text_input("Enter Administrator Password", type="password", key="admin_password")
 
 
 # a function for users management       
@@ -205,24 +209,15 @@ def it_ticket_management():
                 ticket_id = add_it_ticket(conn, priority, description, status, assigned_to, str(created_at), resolution_time)
                 conn.commit()
                 st.success(f"IT Ticket added successfully. Ticket ID: {ticket_id}")
+                
+#call all of the functions
+user_management()
+cyber_management()
+metadata_management()
+it_ticket_management()
 
  
  
 
-#verify admin password and provide access to authorised functionalities
-# Verify button
-if st.button("Verify"):
-    if admin_password == st.secrets["ADMIN_PASSWORD"]:
-        st.session_state.admin_logged_in = True
-        st.success("Administrator access granted")
-    else:
-        if admin_password != "":
-            st.session_state.admin_logged_in = False
-            st.error("Incorrect administrator password.")
 
-# Tabs persist across reruns because we use session_state
-if st.session_state.get("admin_logged_in", False):
-    user_management()
-    cyber_management()
-    metadata_management()
-    it_ticket_management()
+    
