@@ -8,8 +8,6 @@ from hashing import generate_hash_password, verify_password
 import re
 
 #Function to register a new user.
-
-
 def register_user(conn, username, password):
     # Password validation using regex
     if len(password) < 8:
@@ -163,14 +161,14 @@ def migrate_users(conn):
     except FileNotFoundError:
             print("users.txt file not found.")
     
-
+#get all users function
 def get_all_users(conn):
    cursor = conn.cursor()
    sql = """SELECT * FROM users"""
    cursor.execute(sql)
    users = cursor.fetchall()
    return(users)
-
+#a function to get one specific user
 def get_user(conn, username):
     cursor = conn.cursor()
     sql = """SELECT * FROM users WHERE username = ?"""
@@ -179,6 +177,7 @@ def get_user(conn, username):
     user = cursor.fetchone()
     return(user)
 
+#a function to update a user in the database
 def update_user(conn, old_username, new_username):     
     cursor = conn.cursor()
     sql = "UPDATE users SET username = ? WHERE username = ?"
@@ -187,6 +186,7 @@ def update_user(conn, old_username, new_username):
     conn.commit()
 
 
+#a function to delete a user in a database
 def delete_user(conn, username):     
     cursor = conn.cursor()
     sql = "DELETE FROM users WHERE username = ?"
