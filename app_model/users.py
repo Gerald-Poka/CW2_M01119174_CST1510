@@ -5,6 +5,7 @@ import sqlite3
 from configpath import USERS_FILE
 from app_model.db import get_connection
 from hashing import generate_hash_password, verify_password
+import streamlit as st
 import re
 
 #Function to register a new user.
@@ -193,3 +194,31 @@ def delete_user(conn, username):
     parameters = (username,)
     cursor.execute(sql, parameters)
     conn.commit()
+    
+#A function to promote users role to admin
+def promote_user(conn, username):
+    cursor = conn.cursor()
+    sql = """UPDATE users SET role = ? WHERE username = ?"""
+    cursor.execute(sql, ("admin", username))
+    conn.commit()
+    
+ #a function to demote user from admin to user
+def demote_user(conn, username):
+    cursor = conn.cursor()
+    sql = """ UPDATE users SET role = ? WHERE username = ? """
+    parameters = ("user", username)
+    cursor.execute(sql, parameters)
+    conn.commit()
+    return cursor.rowcount > 0
+
+#a function that allows admin to change users password without previous password
+def admin_change_password(conn, username):
+    new_password_admin = st.secrets["RESET_PASSWORD"] 
+    cursor = conn.cursor()
+    # Hash the new password
+    hashed_password = generate_hash_password(new_password_admin)
+    sql = """UPDATE users SET password_hash = ? WHERE username = ? """
+    parameters = (hashed_password, username)
+    cursor.execute(sql, parameters)
+    conn.commit()
+    return cursor.rowcount > 0
