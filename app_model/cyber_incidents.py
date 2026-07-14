@@ -1,4 +1,4 @@
-#import os for file location and import pandas
+#import paths for file location and import pandas
 import pandas as pd
 from configpath import CYBER_INCIDENTS_FILE
 
@@ -7,11 +7,13 @@ from configpath import CYBER_INCIDENTS_FILE
 def migrate_cyber_incidents(conn):
     data = pd.read_csv(CYBER_INCIDENTS_FILE)
     data.to_sql('cyber_incidents', conn, if_exists='replace', index=False)
+    
 #function to get all cyber incidents
 def get_all_cyber_incidents(conn):
     sql = 'SELECT * FROM cyber_incidents'
     data = pd.read_sql(sql, conn)
     return(data)
+
 #function to add cyber incidences
 def add_cyber_incident(conn, timestamp, severity, category, status, description):
     cursor = conn.cursor()

@@ -1,3 +1,4 @@
+#importing all necessary packages,and functions
 import streamlit as st
 from app_model.cyber_incidents import get_all_cyber_incidents
 from app_model.metadata import get_all_datasets_metadata
@@ -5,15 +6,15 @@ from app_model.it_tickets import get_all_it_tickets
 from app_model.db import get_connection
 import pandas as pd
 
-
+#setting the page
 st.set_page_config(
     page_title="Home", 
     page_icon=":house:", 
     layout="wide")
-
+#Set logged in session state as false
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
-
+#setting the condition for when user is not logged in
 if not st.session_state.logged_in:
     st.write("Please log in to access the dashboard.")
     if st.button("Go to Login Page"):

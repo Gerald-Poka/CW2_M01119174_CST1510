@@ -1,3 +1,4 @@
+#import bcrypt function gor password hashing
 import bcrypt
 
 #a function to generate the hash passord using bcrypt library

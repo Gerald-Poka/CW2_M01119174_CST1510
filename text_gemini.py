@@ -1,3 +1,6 @@
+#the base of the ai assistant
+#import google package to accomodate gemini api key
+#import streamlit
 from google import genai
 import streamlit as st
 

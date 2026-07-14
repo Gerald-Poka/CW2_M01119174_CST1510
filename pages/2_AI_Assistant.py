@@ -1,7 +1,7 @@
+# import all packages and functions
 import streamlit as st
 from google import genai
 import pandas as pd
-
 from app_model.db import get_connection
 from app_model.cyber_incidents import get_all_cyber_incidents
 from app_model.metadata import get_all_datasets_metadata
@@ -10,26 +10,14 @@ from app_model.it_tickets import get_all_it_tickets
 #call the API key from secrets
 client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
 
-# Load  all data for establishing context
-#load cyber incidents
-cyber_conn = get_connection()
-cyber_incidents_data = get_all_cyber_incidents(cyber_conn)
-cyber_conn.close()
-
-#load metadata
-metadata_conn = get_connection()
-metadata_data = get_all_datasets_metadata(metadata_conn)
-metadata_conn.close()
-
-#load IT tickets
-tickets_conn = get_connection()
-it_tickets_data = get_all_it_tickets(tickets_conn)
-tickets_conn.close()
+# Load all data for establishing context
+conn = get_connection()
+cyber_incidents_data = get_all_cyber_incidents(conn)
+metadata_data = get_all_datasets_metadata(conn)
+it_tickets_data = get_all_it_tickets(conn)
 
 
 #Telling the LLM what the data base looks like
-# creating the schema, to know the table names and column names to write correct SQL
-
 database_schema = """
 You have access to a SQLite database with these exact tables and columns:
 
@@ -63,12 +51,7 @@ Columns:
 """
 
 #A function that takes the question asked and converts it into an SQL query
-
 def generate_sql(user_question: str) -> str:
-    """
-   Generate SQL query from user input using Gemini.
-    """
-
     sql_prompt = f"""
 You are a SQL expert working with a SQLite database.
 
@@ -89,38 +72,29 @@ Rules:
 - Do not include semicolons at the end.
 - Only use tables and columns that exist in the schema above.
 """
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=sql_prompt,
+        )
+        return response.text.strip()
+    
+    except Exception as e:
+        return "SERVER_ERROR"
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=sql_prompt,
-    )
 
-    return response.text.strip()
-
-
-# a function that takes up the SQL query that gemini wrote and runs it against the data base
+# a function that takes up the SQL query that gemini wrote and runs it against the database
 def execute_sql(sql_query: str) -> pd.DataFrame:
-    """
-    Executes the SQL query against the real SQLite database.
-    Returns the result as a pandas DataFrame.
-    """
     conn = get_connection()
     try:
         result = pd.read_sql_query(sql_query, conn)
         return result
     except Exception as e:
         return pd.DataFrame({"Error": [str(e)]})
-    finally:
-        conn.close()
 
 
-# a function that returns the result from the data base and asks gemini to explain it
+# a function that returns the result from the database and asks gemini to explain it
 def explain_results(user_question: str, sql_query: str, results: pd.DataFrame) -> str:
-    """
-    Sends the SQL results back to Gemini.
-    Gemini explains what the results mean in plain English.
-    """
-
     explain_prompt = f"""
 You are a cybersecurity intelligence assistant.
 
@@ -139,22 +113,15 @@ Your job:
 - Do not guess or estimate any values.
 - Provide relevant insights or recommendations if appropriate.
 """
-
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=explain_prompt,
     )
-
     return response.text.strip()
 
 
-#Function that handle questions that do not need the data base and are rather anlytical
+#Function that handles questions that do not need the database
 def answer_analytical(user_question: str) -> str:
-    """
-    For questions that do not need database queries.
-    Gemini answers using its reasoning capabilities.
-    """
-
     analytical_prompt = f"""
 You are a cybersecurity intelligence assistant for this organisation.
 
@@ -170,16 +137,14 @@ User Question:
 
 Provide a clear and helpful answer.
 """
-
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=analytical_prompt,
     )
-
     return response.text.strip()
 
 
-# Streamlit chat page foundation
+# Streamlit chat page
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
 
@@ -210,35 +175,46 @@ if prompt:
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").write(prompt)
 
-    #shows a spinning animation while the code is working
+    # shows a spinning animation while the code is working
     with st.spinner("Thinking..."):
-
-        # Ask Gemini to generate SQL
         sql_query = generate_sql(prompt)
 
-        if sql_query == "NO_SQL_NEEDED":
+    # handle api errors
+    if sql_query == "SERVER_ERROR":
+        with st.chat_message("assistant"):
+            st.error("Gemini is currently busy. Please try again in a moment.")
+        st.stop()
 
-            #No SQL needed, answer analytically
+    elif sql_query == "NO_SQL_NEEDED":
+        # No SQL needed, answer analytically
+        gemini_reply = answer_analytical(prompt)
+        with st.chat_message("assistant"):
+            st.write(gemini_reply)
+
+    else:
+        # Execute the SQL against the database
+        query_results = execute_sql(sql_query)
+
+        if "Error" in query_results.columns:
+            # SQL failed, fall back to analytical
             gemini_reply = answer_analytical(prompt)
+            with st.chat_message("assistant"):
+                st.write(gemini_reply)
 
         else:
+            # Ask Gemini to explain the real results
+            gemini_reply = explain_results(prompt, sql_query, query_results)
+            with st.chat_message("assistant"):
+                st.write(gemini_reply)
 
-            # Execute the SQL against the database
-            query_results = execute_sql(sql_query)
+            # Show the raw results
+            with st.expander("View raw query results"):
+                st.code(sql_query, language="sql")
+                st.dataframe(query_results)
 
-            if "Error" in query_results.columns:
-                # SQL failed, fall back to analytical
-                gemini_reply = answer_analytical(prompt)
+    # Save assistant reply to history
+    if sql_query != "SERVER_ERROR":
+        st.session_state.messages.append({"role": "assistant", "content": gemini_reply})
 
-            else:
-                # Ask Gemini to explain the real results
-                gemini_reply = explain_results(prompt, sql_query, query_results)
 
-                # Show the raw results 
-                with st.expander("View raw query results"):
-                    st.code(sql_query, language="sql")
-                    st.dataframe(query_results)
-
-    # Save and display assistant reply
-    st.session_state.messages.append({"role": "assistant", "content": gemini_reply})
-    st.chat_message("assistant").write(gemini_reply)
+    

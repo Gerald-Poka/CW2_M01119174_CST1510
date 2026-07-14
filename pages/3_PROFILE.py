@@ -1,22 +1,22 @@
+#import all necessary packages and functions
 import streamlit as st
-
 from app_model.db import get_connection
 from app_model.users import change_password
-
+#build the page foundation
 st.set_page_config(page_title="Profile", page_icon="👤", layout="wide")
-
+#check if user is logged in
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
-
+#set a  condition for when the user is not logged in
 if not st.session_state.logged_in:
     st.write("Please log in to access the Profile.")
     if st.button("Go to Login Page"):
         st.session_state.logged_in = False
         st.switch_page("Home.py")
     st.stop()
-
+#get the connection
 conn = get_connection()
-
+#create collumns
 col1, col2 = st.columns([1, 5])
 
 with col1:
@@ -32,9 +32,9 @@ st.divider()
 st.subheader("🔒  Change Password")
 current_username = st.text_input("Username", key="profile_username")
 current_password = st.text_input("Current Password",type="password")
-
+#request the new password
 new_password = st.text_input("New Password",type="password")
-
+#confirm the new password
 confirm_password = st.text_input("Confirm New Password",type="password")
 #cange password buttopn calling the change password function
 if st.button("Change Password"):
@@ -46,7 +46,7 @@ if st.button("Change Password"):
         st.error("New passwords do not match.")
 
     else:
-        
+        #call the change password function
         success, message = change_password(
             conn,
             st.session_state.user_id,

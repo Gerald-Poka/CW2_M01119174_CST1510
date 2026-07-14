@@ -1,6 +1,6 @@
-#import sqlite3 and os
-#importing os to locate files sqlite3
-
+#import sqlite3, streamlit, regular expressions 
+#importing path to locate files sqlite3
+#import all necessary functions from other folders
 import sqlite3
 from configpath import USERS_FILE
 from app_model.db import get_connection
@@ -38,14 +38,13 @@ def register_user(conn, username, password):
 
     except Exception as e:
         return False, f"Error registering user: {e}"
+    
 
 #store the username and hashed password in a txt file
 def write_to_users_file(username,hashed_passord):
     with open(USERS_FILE, "a") as f:
         f.write(f"{username}, {hashed_passord}\n")
    
-    
-
     
 #Function to login user.
 def login_user(conn, username_input, password_input):
@@ -68,6 +67,7 @@ def login_user(conn, username_input, password_input):
     else:
         return False, "Incorrect password.", None
 
+#a function to verify user by comparing with user.txt file
 def verify_using_user_txt_file (): 
     username_input = input("Enter your username: ")
     password_input = input("Enter your password: ")  
@@ -88,7 +88,7 @@ def verify_using_user_txt_file ():
     except FileNotFoundError:
         print("No users found. Please register first.")
         
-#function to change users password
+#function for users to change users password
 def change_password(conn, user_id,current_password, new_password ):
     cursor = conn.cursor()
     #get the saved hasged password
@@ -169,6 +169,7 @@ def get_all_users(conn):
    cursor.execute(sql)
    users = cursor.fetchall()
    return(users)
+
 #a function to get one specific user
 def get_user(conn, username):
     cursor = conn.cursor()
@@ -218,6 +219,7 @@ def demote_user(conn, username):
 
 #a function that allows admin to change users password without previous password
 def admin_change_password(conn, username):
+    #set a constant password that user defautly gets and stored in secrets
     new_password_admin = st.secrets["RESET_PASSWORD"] 
     cursor = conn.cursor()
     # Hash the new password

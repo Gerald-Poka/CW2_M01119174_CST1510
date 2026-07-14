@@ -1,19 +1,19 @@
+#import all packages and functions
 import streamlit as st
-
 from app_model.db import get_connection
 from app_model.users import register_user, login_user
-
+#call the connection to database
 conn = get_connection()
 
+
+#set the foundation of the page
 st.set_page_config(page_title="Home")
-
 st.title("Home")
-
 st.write("Welcome Home!")
-
+#setting session state as false 
 if 'logged_in' not in st.session_state:
     st.session_state.logged_in = False
-    
+#set tabs for loggin and registration   
 tab_login, tab_register = st.tabs(["Login", "Register"])
 #create the login tab
 with tab_login:

@@ -1,4 +1,4 @@
-#importing os to locate files sqlite3
+#importing paths to locate files, sqlite3 and streamlit
 from configpath import DB_FILE
 import sqlite3
 import streamlit as st
