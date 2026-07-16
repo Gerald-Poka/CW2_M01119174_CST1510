@@ -2,6 +2,7 @@
 import streamlit as st
 from google import genai
 import pandas as pd
+import logging
 from app_model.db import get_connection
 from app_model.cyber_incidents import get_all_cyber_incidents
 from app_model.metadata import get_all_datasets_metadata
@@ -15,6 +16,9 @@ conn = get_connection()
 cyber_incidents_data = get_all_cyber_incidents(conn)
 metadata_data = get_all_datasets_metadata(conn)
 it_tickets_data = get_all_it_tickets(conn)
+
+#cinfigure error logging
+logging.basicConfig(filename="gemini_errors.log",level=logging.ERROR,format="%(asctime)s - %(levelname)s - %(message)s")
 
 
 #Telling the LLM what the data base looks like
@@ -57,14 +61,17 @@ You are a SQL expert working with a SQLite database.
 
 {database_schema}
 
+Conversation History:
+{get_chat_history()}
+
 The user has asked this question:
 {user_question}
 
 Your job:
 1. Decide if this question requires a database query to answer accurately.
 2. If yes, write a single valid SQLite SQL query that answers the question.
-3. If no (e.g. the question is conceptual or about recommendations), respond with: NO_SQL_NEEDED
-
+3. If the question is about cybersecurity, cyber incidents, IT tickets, dataset metadata, or the organisation's data but does not require SQL, respond with: NO_SQL_NEEDED
+4. If the question is unrelated to the database or these domains, respond with: OUT_OF_SCOPE
 Rules:
 - Only return the raw SQL query or NO_SQL_NEEDED.
 - Do not include any explanation.
@@ -80,6 +87,7 @@ Rules:
         return response.text.strip()
     
     except Exception as e:
+        logging.error(e)
         return "SERVER_ERROR"
 
 
@@ -90,6 +98,7 @@ def execute_sql(sql_query: str) -> pd.DataFrame:
         result = pd.read_sql_query(sql_query, conn)
         return result
     except Exception as e:
+        logging.error(e)
         return pd.DataFrame({"Error": [str(e)]})
 
 
@@ -97,6 +106,9 @@ def execute_sql(sql_query: str) -> pd.DataFrame:
 def explain_results(user_question: str, sql_query: str, results: pd.DataFrame) -> str:
     explain_prompt = f"""
 You are a cybersecurity intelligence assistant.
+
+Conversation History:
+{get_chat_history()}
 
 The user asked:
 {user_question}
@@ -113,12 +125,29 @@ Your job:
 - Do not guess or estimate any values.
 - Provide relevant insights or recommendations if appropriate.
 """
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=explain_prompt,
-    )
-    return response.text.strip()
+    # Return a generator that yields text chunks
+    def stream_response():
+        try:
+            for chunk in client.models.generate_content_stream(
+              model="gemini-2.5-flash",
+            contents=explain_prompt,
+        ):
+                if hasattr(chunk, "text") and chunk.text:
+                    yield chunk.text
 
+        except Exception as e:
+            logging.error(e)
+            if "RESOURCE_EXHAUSTED" in str(e):
+                yield "AI assistant API quota exceeded. Please wait a while."
+            else:
+                yield "An unexpected error occurred while contacting AI."
+    return stream_response()
+#A function to keep history of the conversation and foe the AI to use the history as it answers other questions
+def get_chat_history():
+    history = ""
+    for message in st.session_state.messages[-6:]:
+        history += f"{message['role']}: {message['content']}\n"
+    return history
 
 #Function that handles questions that do not need the database
 def answer_analytical(user_question: str) -> str:
@@ -132,16 +161,41 @@ Context about the organisation data:
 - Open incidents        : {len(cyber_incidents_data[cyber_incidents_data['status'] == 'Open'])}
 - Total IT tickets      : {len(it_tickets_data)}
 
-User Question:
+Converstion History:
+{get_chat_history()}
+
+Current User Question:
 {user_question}
 
-Provide a clear and helpful answer.
+You are an AI assistant for this Cyber Intelligence Platform.
+
+You may ONLY answer questions about:
+- cyber incidents
+- IT tickets
+- dataset metadata
+- cybersecurity
+- information contained in this organisation's database
+
+If the user's question is unrelated to these topics, respond exactly with:
+
+"I'm only able to answer questions related to the Cyber Intelligence Platform database, cybersecurity, IT tickets, and dataset metadata."
 """
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=analytical_prompt,
-    )
-    return response.text.strip()
+    # Return a generator that yields text chunks
+    def stream_response():
+        try:
+            for chunk in client.models.generate_content_stream(
+                model="gemini-2.5-flash",
+                contents=analytical_prompt,
+               ):
+                if hasattr(chunk, 'text') and chunk.text:
+                    yield chunk.text
+        except Exception as e:
+            logging.error(e)
+            if "RESOURCE_EXHAUSTED" in str(e):
+                yield "AI assistant API quota exceeded. Please wait a while."
+            else:
+                yield "An unexpected error occurred while contacting AI."
+    return stream_response()
 
 
 # Streamlit chat page
@@ -173,6 +227,10 @@ if prompt:
 
     # Save and display user message
     st.session_state.messages.append({"role": "user", "content": prompt})
+    #set a limit to the number of chats messages stored per session
+    MAX_HISTORY = 20
+    if len(st.session_state.messages) > MAX_HISTORY:
+        st.session_state.messages = st.session_state.messages[-MAX_HISTORY:]
     st.chat_message("user").write(prompt)
 
     # shows a spinning animation while the code is working
@@ -184,30 +242,32 @@ if prompt:
         with st.chat_message("assistant"):
             st.error("Gemini is currently busy. Please try again in a moment.")
         st.stop()
-
-    elif sql_query == "NO_SQL_NEEDED":
-        # No SQL needed, answer analytically
-        gemini_reply = answer_analytical(prompt)
+    elif sql_query == "OUT_OF_SCOPE":
         with st.chat_message("assistant"):
-            st.write(gemini_reply)
+            gemini_reply = (
+            "I'm only able to answer questions related to the "
+            "Cyber Intelligence Platform database, cybersecurity, "
+            "IT tickets, and dataset metadata."
+        )
+        st.write(gemini_reply)
+    elif sql_query == "NO_SQL_NEEDED":
+        with st.chat_message("assistant"):
+            #capture the full text that write_stream returns
+            gemini_reply = st.write_stream(answer_analytical(prompt))
 
     else:
-        # Execute the SQL against the database
         query_results = execute_sql(sql_query)
 
         if "Error" in query_results.columns:
-            # SQL failed, fall back to analytical
-            gemini_reply = answer_analytical(prompt)
             with st.chat_message("assistant"):
-                st.write(gemini_reply)
+                #capture the full text that write_stream returns
+                gemini_reply = st.write_stream(answer_analytical(prompt))
 
         else:
-            # Ask Gemini to explain the real results
-            gemini_reply = explain_results(prompt, sql_query, query_results)
             with st.chat_message("assistant"):
-                st.write(gemini_reply)
+                #capture the full text that write_stream returns
+                gemini_reply = st.write_stream(explain_results(prompt, sql_query, query_results))
 
-            # Show the raw results
             with st.expander("View raw query results"):
                 st.code(sql_query, language="sql")
                 st.dataframe(query_results)
@@ -215,6 +275,6 @@ if prompt:
     # Save assistant reply to history
     if sql_query != "SERVER_ERROR":
         st.session_state.messages.append({"role": "assistant", "content": gemini_reply})
-
-
-    
+    MAX_HISTORY = 10
+    if len(st.session_state.messages) > MAX_HISTORY:
+        st.session_state.messages = st.session_state.messages[-MAX_HISTORY:]

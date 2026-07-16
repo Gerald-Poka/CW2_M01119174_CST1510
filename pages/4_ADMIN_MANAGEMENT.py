@@ -88,7 +88,7 @@ def user_management():
     
     with col2:
         if st.button("Demote", key="demote_btn", use_container_width=True):
-            if username:
+            if username != "Manager":
                 demote_user(conn, username)
                 conn.commit()
                 st.success(f"{username} demoted to User successfully.")
@@ -98,7 +98,7 @@ def user_management():
     
     with col3:
         if st.button("Reset Password", key="change_pwd_btn", use_container_width=True):
-            if username:
+            if username != "Manager":
                 admin_change_password(conn, username)
                 conn.commit()
                 st.success(f"Password reset for {username} successfully.")
@@ -108,7 +108,7 @@ def user_management():
     
     with col4:
         if st.button("Delete", key="delete_btn", use_container_width=True):
-            if username:
+            if username != "Manager":
                 delete_user(conn, username)
                 conn.commit()
                 st.success(f"{username} deleted successfully.")
