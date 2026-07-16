@@ -220,7 +220,7 @@ def demote_user(conn, username):
 #a function that allows admin to change users password without previous password
 def admin_change_password(conn, username):
     #set a constant password that user defautly gets and stored in secrets
-    new_password_admin = st.secrets["RESET_PASSWORD"] 
+    new_password_admin = "password1234"
     cursor = conn.cursor()
     # Hash the new password
     hashed_password = generate_hash_password(new_password_admin)
