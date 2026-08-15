@@ -2,7 +2,8 @@
 
 {% block title %}Profile - Cyber Intelligence Platform{% endblock %}
 
-{% block page_title %}Profile{% endblock %}
+{% block page_title %}User Profile{% endblock %}
+{% block breadcrumb_item %}Profile{% endblock %}
 
 {% block content %}
 
@@ -14,7 +15,7 @@
 					<i class="ph-user-circle ph-2x"></i>
 				</div>
 				<h5 class="mt-3 mb-0">{{ username }}</h5>
-				<span class="badge bg-{% if role == 'admin' %}danger{% else %}secondary{% endif %} mt-1">{{ role|capfirst }}</span>
+				<span class="badge bg-{% if role == 'Administrator' %}danger{% else %}secondary{% endif %} mt-1">{{ role|capfirst }}</span>
 			</div>
 		</div>
 	</div>

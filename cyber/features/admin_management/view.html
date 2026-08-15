@@ -3,6 +3,7 @@
 {% block title %}Admin Management - Cyber Intelligence Platform{% endblock %}
 
 {% block page_title %}Administrator Management System{% endblock %}
+{% block breadcrumb_item %}Admin Management{% endblock %}
 
 {% block content %}
 
@@ -43,7 +44,7 @@
 						<tbody>
 							{% for u in users %}
 							<tr><td>{{ u.id }}</td><td>{{ u.username }}</td>
-								<td><span class="badge bg-{% if u.role == 'admin' %}danger{% else %}secondary{% endif %}">{{ u.role }}</span></td></tr>
+								<td><span class="badge bg-{% if u.role_name == 'Administrator' %}danger{% else %}secondary{% endif %}">{{ u.role_name }}</span></td></tr>
 							{% empty %}
 							<tr><td colspan="3" class="text-muted">No users found.</td></tr>
 							{% endfor %}

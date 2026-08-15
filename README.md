@@ -322,14 +322,82 @@ CW2_M01119174_CST1510/
 
 The platform uses a **PostgreSQL** database named `cyber_intel`. The schema is fully normalised with single primary keys, `NOT NULL` constraints where required, `CHECK` constraints to enforce valid enum values, and indexes on frequently queried columns.
 
-### `users`
+### `roles`
+
+Lookup table of application roles.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | BigInt (PK) | Auto-increment |
+| `role_name` | Varchar(50) | Unique — `Administrator`, `Normal Staff` |
+| `created_at` | DateTime | Auto-set on create |
+| `created_by` | FK → `user.id` | Nullable; who created the row |
+| `updated_at` | DateTime | Auto-refreshed on update |
+| `updated_by` | FK → `user.id` | Nullable; who last updated the row |
+
+### `user`
+
+Login credentials only — all profile details live in `staff`.
 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | BigInt (PK) | Auto-increment |
 | `username` | Varchar(150) | Unique |
 | `password_hash` | Varchar(255) | bcrypt hash |
-| `role` | Varchar(20) | `user` or `admin` — CHECK constraint |
+| `role_id` | FK → `roles.id` | Role lookup (`Administrator` / `Normal Staff`) |
+| `is_active` | Boolean | Account enabled flag |
+| `last_login` | DateTime | Nullable |
+| `created_at` | DateTime | Auto-set on create |
+| `created_by` | FK → `user.id` | Nullable (self-referential audit) |
+| `updated_at` | DateTime | Auto-refreshed on update |
+| `updated_by` | FK → `user.id` | Nullable |
+
+> The table is named `user`, which is a PostgreSQL reserved word, so it is
+> always double-quoted (`"user"`) in generated SQL.
+
+### `staff`
+
+Complete user details, linked one-to-one with a login account.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | BigInt (PK) | Auto-increment |
+| `user_id` | FK → `user.id` | Unique (one-to-one) |
+| `full_name` | Varchar(200) | e.g. `Poka Machande` |
+| `email` | Varchar(255) | Nullable |
+| `phone` | Varchar(30) | Nullable |
+| `position` | Varchar(100) | Job position, nullable |
+| `created_at` / `created_by` / `updated_at` / `updated_by` | | Standard audit columns |
+
+### `login_count`
+
+Running login counter per user.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | BigInt (PK) | Auto-increment |
+| `user_id` | FK → `user.id` | Unique (one-to-one) |
+| `login_count` | Integer | Number of successful logins, default 0 |
+| `last_login_at` | DateTime | Timestamp of the most recent login |
+| `created_at` / `created_by` / `updated_at` / `updated_by` | | Standard audit columns |
+
+### `auth`
+
+Real authentication events — successful logins, failed attempts and logouts.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | BigInt (PK) | Auto-increment |
+| `user_id` | FK → `user.id` | Nullable (unknown usernames keep the event) |
+| `username` | Varchar(150) | Username used in the attempt |
+| `auth_type` | Varchar(20) | `LOGIN`, `LOGOUT` or `FAILED` — CHECK constraint |
+| `status` | Varchar(20) | `success` or `failure` — CHECK constraint |
+| `ip_address` | Varchar(45) | Source IP of the attempt |
+| `user_agent` | Varchar(500) | Client user agent, nullable |
+| `created_at` / `created_by` / `updated_at` / `updated_by` | | Standard audit columns |
+
+> Every table carries the same audit columns: `created_at` (auto-set on
+> insert), `created_by`, `updated_at` (auto-refreshed) and `updated_by`.
 
 ### `cyber_incidents`
 
@@ -545,8 +613,12 @@ Open **http://127.0.0.1:8000/** in your browser.
 
 | Field | Value |
 |---|---|
-| Username | `Manager` |
-| Password | `Admin1!Admin1!` |
+| Username | `poka` |
+| Password | `Pok@12345` |
+
+> `poka` is seeded as an **Administrator** (see the `roles` lookup table) with
+> staff details in the `staff` table. The legacy `Manager` account also retains
+> the Administrator role.
 
 Administrators can promote/demote users, reset passwords, delete users, and add incidents, datasets, and tickets.
 

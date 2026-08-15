@@ -1,11 +1,20 @@
 <!-- Page header / breadcrumb -->
-<div class="page-header">
-	<div class="page-header-content d-lg-flex">
-		<div class="d-flex">
-			<h4 class="page-title mb-0">
+<div class="page-header page-header-custom">
+	<div class="page-header-content d-lg-flex justify-content-between align-items-center py-2 px-3">
+		<div class="d-flex flex-column">
+			<h4 class="page-title mb-1 fw-bold text-dark">
 				{% block page_title %}{% endblock %}
 			</h4>
+			<div class="breadcrumb text-muted fs-sm">
+				<a href="{% url 'cyber:dashboard' %}" class="breadcrumb-item text-muted text-decoration-none"><i class="ph-house me-1"></i> Home</a>
+				<span class="breadcrumb-item active text-primary">{% block breadcrumb_item %}{% endblock %}</span>
+			</div>
 		</div>
+		{% if request.session.username %}
+		<div class="text-muted fs-sm d-none d-lg-flex align-items-center">
+			<i class="ph-user-check me-1 text-success"></i> Welcome, <strong class="text-dark ms-1">{{ request.session.username }}</strong>
+		</div>
+		{% endif %}
 	</div>
 </div>
 <!-- /page header -->

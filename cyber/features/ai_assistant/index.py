@@ -44,6 +44,47 @@ Columns:
   - uploaded_by : who uploaded it (e.g. data_scientist, cyber_admin)
   - upload_date : date it was uploaded
 
+TABLE: roles
+Columns:
+  - id         : role ID (e.g. 1, 2)
+  - role_name  : values are exactly: Administrator, Normal Staff
+
+TABLE: user  (IMPORTANT: always quote this table as "user" in SQL, because user is a reserved word)
+Columns:
+  - id            : unique user ID
+  - username      : login username (unique)
+  - password_hash : bcrypt hash - never expose or display this value
+  - role_id       : foreign key to roles.id
+  - is_active     : whether the account is active (true/false)
+  - last_login    : timestamp of the last successful login
+  - created_at    : when the login account was created
+
+TABLE: staff
+Columns:
+  - id         : unique staff record ID
+  - user_id    : foreign key to user.id (one login account per staff member)
+  - full_name  : complete staff name (e.g. Poka Machande)
+  - email      : staff email address
+  - phone      : staff phone number
+  - position   : job position or title
+
+TABLE: login_count
+Columns:
+  - id            : unique row ID
+  - user_id       : foreign key to user.id
+  - login_count   : number of successful logins
+  - last_login_at : timestamp of the most recent login
+
+TABLE: auth
+Columns:
+  - id         : unique authentication event ID
+  - user_id    : foreign key to user.id (null when the username does not exist)
+  - username   : username used in the attempt
+  - auth_type  : values are exactly: LOGIN, LOGOUT, FAILED
+  - status     : values are exactly: success, failure
+  - ip_address : source IP of the attempt
+  - created_at : when the authentication event happened
+
 TABLE: audit_trail
 Columns:
   - id               : unique event ID (1, 2, 3, ...)

@@ -11,10 +11,14 @@ from cyber.decorators import admin_required
 from cyber.features.admin_management import js_view
 
 
+ADMIN_USERNAME = "poka"
+
+
 @admin_required
 def index(request):
     message = None
     message_type = None
+    actor = services.get_user(request.session.get("username"))
     users = services.get_all_users()
 
     if request.method == "POST":
@@ -22,19 +26,19 @@ def index(request):
 
         if action == "promote":
             username = request.POST.get("username")
-            if username and services.promote_user(username):
-                message, message_type = f"{username} promoted to Admin.", "success"
+            if username and services.promote_user(username, actor=actor):
+                message, message_type = f"{username} promoted to Administrator.", "success"
         elif action == "demote":
             username = request.POST.get("username")
-            if username and username != "Manager" and services.demote_user(username):
-                message, message_type = f"{username} demoted to User.", "success"
+            if username and username != ADMIN_USERNAME and services.demote_user(username, actor=actor):
+                message, message_type = f"{username} demoted to Normal Staff.", "success"
         elif action == "reset_password":
             username = request.POST.get("username")
-            if username and username != "Manager" and services.admin_change_password(username):
+            if username and username != ADMIN_USERNAME and services.admin_change_password(username):
                 message, message_type = f"Password reset for {username}.", "success"
         elif action == "delete_user":
             username = request.POST.get("username")
-            if username and username != "Manager":
+            if username and username != ADMIN_USERNAME:
                 services.delete_user(username)
                 message, message_type = f"{username} deleted.", "success"
         elif action == "add_incident":
@@ -77,8 +81,8 @@ def index(request):
 
         users = services.get_all_users()
 
-    admin_count = sum(1 for u in users if u.role == "admin")
-    user_count = sum(1 for u in users if u.role == "user")
+    admin_count = sum(1 for u in users if u.role_name == "Administrator")
+    user_count = sum(1 for u in users if u.role_name == "Normal Staff")
 
     return render(request, "admin_management/view.html", {
         "users": users,

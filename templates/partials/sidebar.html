@@ -1,82 +1,62 @@
 {% load static %}
 <!-- Main sidebar -->
-<div class="sidebar sidebar-dark sidebar-main sidebar-expand-lg">
+<div class="sidebar sidebar-dark sidebar-main sidebar-expand-lg sidebar-theme-navy">
 
 	<!-- Sidebar header -->
-	<div class="sidebar-section bg-black bg-opacity-10 border-bottom border-bottom-white border-opacity-10">
-		<div class="sidebar-logo d-flex justify-content-center align-items-center">
-			<a href="{% url 'cyber:dashboard' %}" class="d-inline-flex align-items-center py-2">
-				<img src="{% static 'assets/images/logo_icon.svg' %}" class="sidebar-logo-icon" alt="">
-				<img src="{% static 'assets/images/logo_text_light.svg' %}" class="sidebar-resize-hide ms-3" height="14" alt="">
-			</a>
-
-			<div class="sidebar-resize-hide ms-auto">
-				<button type="button" class="btn btn-flat-white btn-icon btn-sm rounded-pill border-transparent sidebar-control sidebar-main-resize d-none d-lg-inline-flex">
-					<i class="ph-arrows-left-right"></i>
-				</button>
-
-				<button type="button" class="btn btn-flat-white btn-icon btn-sm rounded-pill border-transparent sidebar-mobile-main-toggle d-lg-none">
-					<i class="ph-x"></i>
-				</button>
-			</div>
+	<div class="sidebar-section px-3 py-2 border-bottom border-white border-opacity-10 d-flex align-items-center justify-content-between">
+		<span class="fw-bold text-white fs-6 mb-0">Navigation</span>
+		<div class="sidebar-resize-hide">
+			<button type="button" class="btn btn-flat-white btn-icon btn-sm rounded-circle sidebar-control sidebar-main-resize d-none d-lg-inline-flex text-white">
+				<i class="ph-arrows-left-right"></i>
+			</button>
+			<button type="button" class="btn btn-flat-white btn-icon btn-sm rounded-circle sidebar-mobile-main-toggle d-lg-none text-white">
+				<i class="ph-x"></i>
+			</button>
 		</div>
 	</div>
 	<!-- /sidebar header -->
 
-	<!-- Sidebar content -->
+	<!-- Sidebar content (Single Column List) -->
 	<div class="sidebar-content">
-
-		<!-- Main navigation -->
-		<div class="sidebar-section">
-			<ul class="nav nav-sidebar" data-nav-type="accordion">
-
-				<li class="nav-item-header">
-					<div class="text-uppercase fs-sm lh-sm opacity-50 sidebar-resize-hide">Main</div>
-					<i class="ph-dots-three sidebar-resize-show"></i>
-				</li>
+		<div class="sidebar-section p-0">
+			<ul class="nav nav-sidebar flex-column w-100 p-0" data-nav-type="accordion">
 
 				{% with active=request.resolver_match.url_name %}
-				<li class="nav-item">
-					<a href="{% url 'cyber:dashboard' %}" class="nav-link {% if active == 'dashboard' %}active{% endif %}">
-						<i class="ph-house"></i>
+				<li class="nav-item border-bottom border-white border-opacity-10">
+					<a href="{% url 'cyber:dashboard' %}" class="nav-link py-2.5 px-3 {% if active == 'dashboard' %}active{% endif %}">
+						<i class="ph-house me-2.5 fs-5"></i>
 						<span>Dashboard</span>
 					</a>
 				</li>
-				<li class="nav-item">
-					<a href="{% url 'cyber:ai_assistant' %}" class="nav-link {% if active == 'ai_assistant' %}active{% endif %}">
-						<i class="ph-chat-circle"></i>
+				<li class="nav-item border-bottom border-white border-opacity-10">
+					<a href="{% url 'cyber:ai_assistant' %}" class="nav-link py-2.5 px-3 {% if active == 'ai_assistant' %}active{% endif %}">
+						<i class="ph-chat-circle me-2.5 fs-5"></i>
 						<span>AI Assistant</span>
 					</a>
 				</li>
-				<li class="nav-item">
-					<a href="{% url 'cyber:cyber_agent' %}" class="nav-link {% if active == 'cyber_agent' %}active{% endif %}">
-						<i class="ph-robot"></i>
+				<li class="nav-item border-bottom border-white border-opacity-10">
+					<a href="{% url 'cyber:cyber_agent' %}" class="nav-link py-2.5 px-3 {% if active == 'cyber_agent' %}active{% endif %}">
+						<i class="ph-robot me-2.5 fs-5"></i>
 						<span>Cyber Agent</span>
 					</a>
 				</li>
-				<li class="nav-item">
-					<a href="{% url 'cyber:analysis_reports' %}" class="nav-link {% if active == 'analysis_reports' %}active{% endif %}">
-						<i class="ph-chart-bar"></i>
+				<li class="nav-item border-bottom border-white border-opacity-10">
+					<a href="{% url 'cyber:analysis_reports' %}" class="nav-link py-2.5 px-3 {% if active == 'analysis_reports' %}active{% endif %}">
+						<i class="ph-chart-bar me-2.5 fs-5"></i>
 						<span>Analysis Reports</span>
 					</a>
 				</li>
-
-				<li class="nav-item-header">
-					<div class="text-uppercase fs-sm lh-sm opacity-50 sidebar-resize-hide">Account</div>
-					<i class="ph-dots-three sidebar-resize-show"></i>
-				</li>
-
-				<li class="nav-item">
-					<a href="{% url 'cyber:profile' %}" class="nav-link {% if active == 'profile' %}active{% endif %}">
-						<i class="ph-user"></i>
+				<li class="nav-item border-bottom border-white border-opacity-10">
+					<a href="{% url 'cyber:profile' %}" class="nav-link py-2.5 px-3 {% if active == 'profile' %}active{% endif %}">
+						<i class="ph-user me-2.5 fs-5"></i>
 						<span>Profile</span>
 					</a>
 				</li>
 
-				{% if request.session.role == 'admin' %}
-				<li class="nav-item">
-					<a href="{% url 'cyber:admin_management' %}" class="nav-link {% if active == 'admin_management' %}active{% endif %}">
-						<i class="ph-shield-check"></i>
+				{% if request.session.role == 'Administrator' %}
+				<li class="nav-item border-bottom border-white border-opacity-10">
+					<a href="{% url 'cyber:admin_management' %}" class="nav-link py-2.5 px-3 {% if active == 'admin_management' %}active{% endif %}">
+						<i class="ph-shield-check me-2.5 fs-5"></i>
 						<span>Admin Management</span>
 					</a>
 				</li>
@@ -85,8 +65,6 @@
 
 			</ul>
 		</div>
-		<!-- /main navigation -->
-
 	</div>
 	<!-- /sidebar content -->
 

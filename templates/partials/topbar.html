@@ -1,41 +1,33 @@
 {% load static %}
 <!-- Main navbar -->
-<div class="navbar navbar-expand-lg navbar-static shadow">
-	<div class="container-fluid">
-		<div class="d-flex d-lg-none">
-			<button type="button" class="navbar-toggler sidebar-mobile-main-toggle rounded">
-				<i class="ph-list"></i>
-			</button>
+<div class="navbar navbar-expand-lg navbar-static navbar-theme-navy px-3">
+	<div class="container-fluid px-0">
+		<div class="d-flex align-items-center">
+			<div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white text-primary p-1 me-2" style="width: 32px; height: 32px;">
+				<i class="ph-shield-check fs-5 text-primary"></i>
+			</div>
+			<span class="text-white fw-bold fs-6 brand-title">Cyber Intelligence Platform</span>
 		</div>
 
-		<div class="navbar-collapse order-2 order-lg-1 collapse" id="navbar-mobile">
-			<ul class="navbar-nav mt-2 mt-lg-0">
-				<li class="nav-item">
-					<span class="navbar-nav-link rounded text-body">
-						<i class="ph-shield-check me-2"></i>
-						Cyber Intelligence Platform
-					</span>
-				</li>
-			</ul>
-		</div>
-
-		<ul class="nav gap-sm-2 order-1 order-lg-2 ms-auto">
+		<ul class="nav gap-sm-2 ms-auto align-items-center">
 			<li class="nav-item nav-item-dropdown-lg dropdown">
-				<a href="#" class="navbar-nav-link align-items-center rounded p-1" data-bs-toggle="dropdown" aria-expanded="false">
-					<div class="status-indicator-container">
-						<div class="d-inline-flex align-items-center justify-content-center rounded bg-primary bg-opacity-10 text-primary w-32px h-32px">
-							<i class="ph-user-circle"></i>
+				<a href="#" class="navbar-nav-link align-items-center rounded px-2 py-1 text-white text-decoration-none" data-bs-toggle="dropdown" aria-expanded="false">
+					<div class="status-indicator-container me-2">
+						<div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-white bg-opacity-20 text-white w-28px h-28px">
+							<i class="ph-user fs-6"></i>
 						</div>
 						<span class="status-indicator bg-success"></span>
 					</div>
-					<span class="d-none d-lg-inline-block mx-lg-2">{{ request.session.username }}</span>
+					<span class="d-none d-sm-inline-block fw-medium text-white me-1" style="font-size: 0.85rem;">{{ request.session.username }}</span>
+					<i class="ph-caret-down fs-xs text-white opacity-75"></i>
 				</a>
 
-				<div class="dropdown-menu dropdown-menu-end">
+				<div class="dropdown-menu dropdown-menu-end shadow border">
 					<div class="dropdown-header">
-						<span class="text-muted fs-sm">Signed in as</span><br>
-						<span class="fw-semibold">{{ request.session.role|capfirst }}</span>
+						<span class="text-muted fs-xs">Signed in as</span><br>
+						<span class="fw-bold text-dark">{{ request.session.username }} ({{ request.session.role|capfirst }})</span>
 					</div>
+					<div class="dropdown-divider"></div>
 					<a href="{% url 'cyber:profile' %}" class="dropdown-item">
 						<i class="ph-user me-2"></i>
 						Profile

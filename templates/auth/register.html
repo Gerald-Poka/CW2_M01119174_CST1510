@@ -42,18 +42,6 @@
 				<!-- Content area -->
 				<div class="content d-flex justify-content-center align-items-center">
 
-					{% if error %}
-					<div class="alert alert-danger alert-dismissible fade show w-100 position-absolute top-0 start-0 m-0" style="z-index:10">
-						{{ error }}
-						<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-					</div>
-					{% elif success %}
-					<div class="alert alert-success alert-dismissible fade show w-100 position-absolute top-0 start-0 m-0" style="z-index:10">
-						{{ success }}
-						<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-					</div>
-					{% endif %}
-
 					<!-- Registration form -->
 					<form class="login-form" method="post" action="{% url 'cyber:register' %}">
 						{% csrf_token %}
@@ -66,6 +54,18 @@
 									<h5 class="mb-0">Create an account</h5>
 									<span class="d-block text-muted">Password needs 8+ chars with upper, lower, digit and special char</span>
 								</div>
+
+								{% if error %}
+								<div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+									<i class="ph-warning-circle me-2"></i>{{ error }}
+									<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+								</div>
+								{% elif success %}
+								<div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+									<i class="ph-check-circle me-2"></i>{{ success }}
+									<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+								</div>
+								{% endif %}
 
 								<div class="mb-3">
 									<label class="form-label">Username</label>

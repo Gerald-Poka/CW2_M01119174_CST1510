@@ -4,6 +4,7 @@
 {% block title %}Dashboard - Cyber Intelligence Platform{% endblock %}
 
 {% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb_item %}Dashboard{% endblock %}
 
 {% block content %}
 
@@ -357,5 +358,7 @@
 {% block extra_js %}
 <script src="{% static 'assets/js/vendor/visualization/echarts/echarts.min.js' %}"></script>
 <script>const PAGE_DATA = {{ js_data|safe }};</script>
+<script>
 {{ js_view|safe }}
+</script>
 {% endblock %}

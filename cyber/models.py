@@ -1,23 +1,164 @@
 from django.db import models
 from django.utils import timezone
 
+# Every table carries the same four audit columns, always defined LAST:
+#   created_at   - stamped automatically on insert (the value shown for a new row)
+#   created_by   - the User who created the row (nullable, system-seeded rows have None)
+#   updated_at   - refreshed automatically on every update
+#   updated_by   - the User who last updated the row (nullable)
 
-class Users(models.Model):
-    """Registered application users (bcrypt-hashed passwords)."""
+
+class Role(models.Model):
+    """Lookup table of application roles (Administrator, Normal Staff)."""
+
+    id = models.BigAutoField(primary_key=True)
+    role_name = models.CharField(max_length=50, unique=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(
+        'User', null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_created')
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        'User', null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_updated')
+
+    class Meta:
+        db_table = 'roles'
+        ordering = ['id']
+
+    def __str__(self):
+        return self.role_name
+
+
+class User(models.Model):
+    """Login credentials only — all other profile data lives in ``staff``."""
 
     id = models.BigAutoField(primary_key=True)
     username = models.CharField(max_length=150, unique=True)
     password_hash = models.CharField(max_length=255)
-    role = models.CharField(max_length=20, default="user")
+    role = models.ForeignKey(Role, on_delete=models.PROTECT,
+                             related_name='users')
+    is_active = models.BooleanField(default=True)
+    last_login = models.DateTimeField(blank=True, null=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(
+        'self', null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_created')
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        'self', null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_updated')
 
     class Meta:
-        db_table = 'users'
+        db_table = 'user'
+
+    @property
+    def role_name(self):
+        return self.role.role_name if self.role else 'Normal Staff'
+
+    def __str__(self):
+        return self.username
+
+
+class Staff(models.Model):
+    """Complete user details, linked one-to-one to a login account."""
+
+    id = models.BigAutoField(primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE,
+                                related_name='staff')
+    full_name = models.CharField(max_length=200)
+    email = models.EmailField(max_length=255, blank=True, null=True)
+    phone = models.CharField(max_length=30, blank=True, null=True)
+    position = models.CharField(max_length=100, blank=True, null=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_created')
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_updated')
+
+    class Meta:
+        db_table = 'staff'
+        indexes = [
+            models.Index(fields=['full_name']),
+            models.Index(fields=['email']),
+        ]
+
+    def __str__(self):
+        return self.full_name
+
+
+class LoginCount(models.Model):
+    """Running login counter per user."""
+
+    id = models.BigAutoField(primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE,
+                                related_name='login_count')
+    login_count = models.IntegerField(default=0)
+    last_login_at = models.DateTimeField(blank=True, null=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_created')
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_updated')
+
+    class Meta:
+        db_table = 'login_count'
+
+    def __str__(self):
+        return f"{self.user.username}: {self.login_count}"
+
+
+class Auth(models.Model):
+    """Real authentication events: successful logins, failures and logouts."""
+
+    id = models.BigAutoField(primary_key=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL,
+                             blank=True, null=True,
+                             related_name='auth_logs')
+    username = models.CharField(max_length=150, blank=True, null=True)
+    auth_type = models.CharField(max_length=20)
+    status = models.CharField(max_length=20, default='success')
+    ip_address = models.CharField(max_length=45, blank=True, null=True)
+    user_agent = models.CharField(max_length=500, blank=True, null=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_created')
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_updated')
+
+    class Meta:
+        db_table = 'auth'
+        indexes = [
+            models.Index(fields=['auth_type']),
+            models.Index(fields=['status']),
+        ]
         constraints = [
             models.CheckConstraint(
-                condition=models.Q(role__in=["user", "admin"]),
-                name="users_role_valid",
+                condition=models.Q(auth_type__in=["LOGIN", "LOGOUT", "FAILED"]),
+                name='auth_type_valid',
+            ),
+            models.CheckConstraint(
+                condition=models.Q(status__in=["success", "failure"]),
+                name='auth_status_valid',
             ),
         ]
+
+    def __str__(self):
+        return f"{self.username} {self.auth_type}"
 
 
 class CyberIncidents(models.Model):
@@ -29,7 +170,15 @@ class CyberIncidents(models.Model):
     category = models.CharField(max_length=50, default="Unknown")
     status = models.CharField(max_length=20, default="Open")
     description = models.TextField(blank=True, null=True)
+
     created_at = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_created')
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_updated')
 
     class Meta:
         db_table = 'cyber_incidents'
@@ -61,7 +210,15 @@ class DatasetsMetadata(models.Model):
     columns = models.IntegerField(default=0, db_column='column_count')
     uploaded_by = models.CharField(max_length=150, blank=True, null=True)
     upload_date = models.DateField(blank=True, null=True)
+
     created_at = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_created')
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_updated')
 
     class Meta:
         db_table = 'datasets_metadata'
@@ -85,8 +242,16 @@ class ItTickets(models.Model):
     description = models.TextField()
     status = models.CharField(max_length=20, default="Open")
     assigned_to = models.CharField(max_length=150, blank=True, null=True)
-    created_at = models.DateTimeField()
     resolution_time_hours = models.IntegerField(blank=True, null=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_created')
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_updated')
 
     class Meta:
         db_table = 'it_tickets'
@@ -119,7 +284,7 @@ class AuditTrail(models.Model):
     """Mirror of the external monitored system's audit log (no labels).
 
     ``user_id`` refers to synthetic identities in the source audit (1-30) and
-    deliberately has no foreign key to ``users``.
+    deliberately has no foreign key to ``user``.
     """
 
     id = models.BigAutoField(primary_key=True)
@@ -134,7 +299,15 @@ class AuditTrail(models.Model):
     status_code = models.IntegerField(blank=True, null=True)
     response_time_ms = models.IntegerField(blank=True, null=True)
     metadata = models.JSONField(blank=True, null=True)
-    created_at = models.DateTimeField()
+
+    created_at = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_created')
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_updated')
 
     class Meta:
         db_table = 'audit_trail'
@@ -153,7 +326,15 @@ class AnalyticalReports(models.Model):
     run_id = models.CharField(max_length=50)
     question = models.TextField()
     answer = models.TextField()
-    created_at = models.DateTimeField()
+
+    created_at = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_created')
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_updated')
 
     class Meta:
         db_table = 'analytical_reports'
@@ -167,7 +348,15 @@ class AiMonitorState(models.Model):
 
     key = models.CharField(max_length=100, primary_key=True)
     value = models.TextField(blank=True, null=True)
+
+    created_at = models.DateTimeField(default=timezone.now)
+    created_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_created')
     updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL,
+        related_name='%(class)s_updated')
 
     class Meta:
         db_table = 'ai_monitor_state'

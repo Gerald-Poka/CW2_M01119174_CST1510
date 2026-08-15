@@ -2,9 +2,14 @@ import re
 
 import bcrypt
 from django.db import models
+from django.utils import timezone
 
 from cyber.models import (
-    Users,
+    User,
+    Role,
+    Staff,
+    LoginCount,
+    Auth,
     CyberIncidents,
     DatasetsMetadata,
     ItTickets,
@@ -49,43 +54,109 @@ def validate_password(password: str):
 
 
 # ---------------------------------------------------------------------------
-# User management
+# User management (user / staff / role / login_count / auth schema)
 # ---------------------------------------------------------------------------
+
+def get_role(role_name: str):
+    return Role.objects.filter(role_name=role_name).first()
+
+
+def _client_ip(request):
+    if request is None:
+        return None
+    xff = request.META.get("HTTP_X_FORWARDED_FOR")
+    if xff:
+        return xff.split(",")[0].strip()[:45]
+    return (request.META.get("REMOTE_ADDR", "")[:45] or None)
+
+
+def _log_auth(username, user, auth_type, status, request):
+    ip = _client_ip(request)
+    user_agent = None
+    if request is not None:
+        user_agent = (request.META.get("HTTP_USER_AGENT", "")[:500] or None)
+    Auth.objects.create(
+        user=user,
+        username=username,
+        auth_type=auth_type,
+        status=status,
+        ip_address=ip,
+        user_agent=user_agent,
+    )
+
 
 def register_user(username: str, password: str):
     valid, message = validate_password(password)
     if not valid:
         return False, message
-    if Users.objects.filter(username=username).exists():
+    if User.objects.filter(username=username).exists():
         return False, "Username already exists."
-    Users.objects.create(
+    normal_role = get_role("Normal Staff")
+    if normal_role is None:
+        return False, "Role configuration missing. Contact an administrator."
+    user = User.objects.create(
         username=username,
         password_hash=generate_hash_password(password),
-        role="user",
+        role=normal_role,
+        is_active=True,
+    )
+    Staff.objects.create(
+        user=user,
+        full_name=username,
+        created_by=user,
+        updated_by=user,
+    )
+    LoginCount.objects.create(
+        user=user,
+        login_count=0,
+        created_by=user,
+        updated_by=user,
     )
     return True, "User registered successfully."
 
 
 def get_user(username: str):
     try:
-        return Users.objects.get(username=username)
-    except Users.DoesNotExist:
+        return (User.objects.select_related("role", "staff")
+                .get(username=username))
+    except User.DoesNotExist:
         return None
 
 
-def login_user(username: str, password: str):
+def login_user(username: str, password: str, request=None):
     user = get_user(username)
     if user is None:
-        return False, "User not found.", None
+        _log_auth(username, None, "FAILED", "failure", request)
+        return False, "Incorrect credentials.", None
+    if not user.is_active:
+        _log_auth(username, user, "FAILED", "failure", request)
+        return False, "Account is inactive.", None
     if verify_password(password, user.password_hash):
+        now = timezone.now()
+        user.last_login = now
+        user.save(update_fields=["last_login", "updated_at"])
+        lc, _ = LoginCount.objects.get_or_create(
+            user=user, defaults={"login_count": 0})
+        lc.login_count = (lc.login_count or 0) + 1
+        lc.last_login_at = now
+        lc.save()
+        _log_auth(username, user, "LOGIN", "success", request)
         return True, "Login successful.", user
-    return False, "Incorrect password.", None
+    _log_auth(username, user, "FAILED", "failure", request)
+    return False, "Incorrect credentials.", None
+
+
+def record_logout(user_id, request=None):
+    user = User.objects.filter(id=user_id).first()
+    if user is None:
+        return
+    _log_auth(user.username, user, "LOGOUT", "success", request)
 
 
 def change_password(user_id: int, current_password: str, new_password: str):
     try:
-        user = Users.objects.get(id=user_id)
-    except Users.DoesNotExist:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
         return False, "User not found."
 
     if not verify_password(current_password, user.password_hash):
@@ -98,6 +169,7 @@ def change_password(user_id: int, current_password: str, new_password: str):
         return False, message
 
     user.password_hash = generate_hash_password(new_password)
+    user.updated_by = user
     user.save()
     return True, "Password changed successfully."
 
@@ -112,30 +184,40 @@ def admin_change_password(username: str):
     return True
 
 
-def promote_user(username: str):
+def promote_user(username: str, actor=None):
     user = get_user(username)
     if user is None:
         return False
-    user.role = "admin"
+    admin_role = get_role("Administrator")
+    if admin_role is None:
+        return False
+    user.role = admin_role
+    if actor is not None:
+        user.updated_by = actor
     user.save()
     return True
 
 
-def demote_user(username: str):
+def demote_user(username: str, actor=None):
     user = get_user(username)
     if user is None:
         return False
-    user.role = "user"
+    staff_role = get_role("Normal Staff")
+    if staff_role is None:
+        return False
+    user.role = staff_role
+    if actor is not None:
+        user.updated_by = actor
     user.save()
     return True
 
 
 def delete_user(username: str):
-    Users.objects.filter(username=username).delete()
+    User.objects.filter(username=username).delete()
 
 
 def get_all_users():
-    return list(Users.objects.all().order_by("id"))
+    return list(User.objects.select_related("role", "staff").order_by("id"))
 
 
 # ---------------------------------------------------------------------------
@@ -233,12 +315,10 @@ def _parse_resolution_hours(value):
 # ---------------------------------------------------------------------------
 
 def add_analytical_report(run_id, question, answer):
-    from django.utils import timezone
     AnalyticalReports.objects.create(
         run_id=run_id,
         question=question,
         answer=answer,
-        created_at=timezone.now().strftime("%Y-%m-%d %H:%M:%S"),
     )
 
 

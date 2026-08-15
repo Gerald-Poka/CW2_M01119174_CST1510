@@ -10,6 +10,7 @@
 	<link href="{% static 'assets/fonts/inter/inter.css' %}" rel="stylesheet" type="text/css">
 	<link href="{% static 'assets/icons/phosphor/styles.min.css' %}" rel="stylesheet" type="text/css">
 	<link href="{% static 'assets/css/ltr/all.min.css' %}" id="stylesheet" rel="stylesheet" type="text/css">
+	<link href="{% static 'assets/css/theme_custom.css' %}" rel="stylesheet" type="text/css">
 	{% block extra_css %}{% endblock %}
 	<!-- /global stylesheets -->
 
@@ -25,6 +26,9 @@
 
 <body>
 
+	<!-- Top navbar spanning full width -->
+	{% include 'partials/topbar.html' %}
+
 	<!-- Page content -->
 	<div class="page-content">
 
@@ -33,12 +37,32 @@
 		<!-- Main content -->
 		<div class="content-wrapper">
 
-			{% include 'partials/topbar.html' %}
-
 			<!-- Inner content -->
 			<div class="content-inner">
 
-				{% include 'partials/breadcrumb.html' %}
+				<!-- Page header / breadcrumb section -->
+				<div class="page-header-container bg-white border-bottom shadow-sm mb-2">
+					<!-- Title Row -->
+					<div class="py-2 px-3">
+						<h6 class="mb-0 fw-bold text-dark" style="font-size: 0.98rem; color: #1e293b;">
+							{% block page_title %}Welcome {{ request.session.username }}{% endblock %}
+						</h6>
+					</div>
+
+					<!-- Divider Line & Breadcrumb Row -->
+					<div class="py-1 px-3 border-top" style="background-color: #f8fafc; border-color: #e2e8f0 !important; font-size: 0.78rem;">
+						<div class="d-flex align-items-center">
+							<a href="{% url 'cyber:dashboard' %}" class="text-primary text-decoration-none d-inline-flex align-items-center">
+								<i class="ph-house me-1" style="font-size: 0.82rem;"></i>
+							</a>
+							<span class="mx-1 text-muted opacity-50">/</span>
+							<span class="text-secondary fw-normal">
+								{% block breadcrumb_item %}Welcome{% endblock %}
+							</span>
+						</div>
+					</div>
+				</div>
+				<!-- /Page header / breadcrumb section -->
 
 				<!-- Content area -->
 				<div class="content pt-0">
@@ -68,6 +92,13 @@
 	</div>
 	<!-- /page content -->
 
+	<script>
+		window.addEventListener('pageshow', function (event) {
+			if (event.persisted || (window.performance && window.performance.navigation && window.performance.navigation.type === 2)) {
+				window.location.reload();
+			}
+		});
+	</script>
 	{% block extra_js %}{% endblock %}
 
 </body>

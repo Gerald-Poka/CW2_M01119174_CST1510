@@ -1,0 +1,148 @@
+/* ========================================================================
+ * Theme Customizations: Dark Blue Topbar & Sidebar Palette
+ * ======================================================================== */
+
+:root {
+	--theme-navy-primary: #1e3a5f;
+	--theme-navy-dark: #162d4a;
+	--theme-navy-darker: #102136;
+	--theme-navy-light: #254a78;
+	--theme-navy-accent: #38bdf8;
+}
+
+/* --- Topbar Styling --- */
+.navbar-theme-navy {
+	background-color: var(--theme-navy-primary) !important;
+	color: #ffffff !important;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.navbar-theme-navy .navbar-nav-link {
+	color: #f1f5f9 !important;
+}
+
+.navbar-theme-navy .navbar-nav-link:hover,
+.navbar-theme-navy .navbar-nav-link:focus {
+	color: #ffffff !important;
+	background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.navbar-theme-navy .brand-title {
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	color: #ffffff !important;
+}
+
+.navbar-theme-navy .navbar-toggler {
+	color: #ffffff !important;
+	border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* --- Sidebar Styling --- */
+.sidebar-theme-navy {
+	background-color: #1e3a5f !important;
+	color: #e2e8f0 !important;
+	border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.sidebar-theme-navy .sidebar-section {
+	background-color: transparent !important;
+}
+
+.sidebar-theme-navy .nav-sidebar .nav-link {
+	color: #f1f5f9 !important;
+	font-weight: 500;
+	transition: all 0.15s ease;
+	border-radius: 0;
+	margin: 0;
+}
+
+.sidebar-theme-navy .nav-sidebar .nav-link i {
+	color: #cbd5e1 !important;
+	transition: color 0.15s ease;
+}
+
+.sidebar-theme-navy .nav-sidebar .nav-link:hover {
+	background-color: rgba(255, 255, 255, 0.1) !important;
+	color: #ffffff !important;
+}
+
+.sidebar-theme-navy .nav-sidebar .nav-link:hover i {
+	color: #38bdf8 !important;
+}
+
+.sidebar-theme-navy .nav-sidebar .nav-link.active {
+	background-color: #162d4a !important;
+	color: #ffffff !important;
+	font-weight: 600;
+	box-shadow: inset 3px 0 0 #38bdf8;
+}
+
+.sidebar-theme-navy .nav-sidebar .nav-link.active i {
+	color: #38bdf8 !important;
+}
+
+/* --- Light Sidebar Styling --- */
+.sidebar-light .nav-sidebar .nav-link {
+	color: #0f172a !important;
+	font-weight: 500;
+	transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.sidebar-light .nav-sidebar .nav-link i {
+	color: #0f172a !important;
+	transition: color 0.15s ease;
+}
+
+.sidebar-light .nav-sidebar .nav-link:hover {
+	background-color: #f1f5f9 !important;
+	color: #0284c7 !important;
+}
+
+.sidebar-light .nav-sidebar .nav-link:hover i {
+	color: #0284c7 !important;
+}
+
+.sidebar-light .nav-sidebar .nav-link.active {
+	background-color: #e0edff !important;
+	color: #1d4ed8 !important;
+	font-weight: 600;
+}
+
+.sidebar-light .nav-sidebar .nav-link.active i {
+	color: #1d4ed8 !important;
+}
+
+/* --- Page Header & Breadcrumb Styling --- */
+.page-header-custom {
+	background: #ffffff;
+	border-bottom: 1px solid #e2e8f0;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+	margin-bottom: 1.25rem;
+}
+
+.page-header-custom .page-title {
+	color: #0f172a;
+	font-size: 1.2rem;
+	font-weight: 700;
+}
+
+.page-header-custom .breadcrumb-item {
+	font-size: 0.85rem;
+}
+
+.page-header-custom .breadcrumb-item + .breadcrumb-item::before {
+	content: "/";
+	color: #94a3b8;
+	padding: 0 0.4rem;
+}
+
+/* --- Full-Width Content Area --- */
+.content-wrapper {
+	background-color: #f1f5f9 !important;
+}
+
+.content {
+	width: 100%;
+}

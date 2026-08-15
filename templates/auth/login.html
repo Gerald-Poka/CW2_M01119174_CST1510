@@ -9,47 +9,15 @@
 	<link href="{% static 'assets/fonts/inter/inter.css' %}" rel="stylesheet" type="text/css">
 	<link href="{% static 'assets/icons/phosphor/styles.min.css' %}" rel="stylesheet" type="text/css">
 	<link href="{% static 'assets/css/ltr/all.min.css' %}" id="stylesheet" rel="stylesheet" type="text/css">
+	<link href="{% static 'assets/css/_login.css' %}" rel="stylesheet" type="text/css">
 
 	<script src="{% static 'assets/demo/demo_configurator.js' %}"></script>
 	<script src="{% static 'assets/js/bootstrap/bootstrap.bundle.min.js' %}"></script>
 	<script src="{% static 'assets/js/app.js' %}"></script>
+	<script src="{% static 'assets/js/auth/_login.js' %}"></script>
 </head>
 
 <body>
-
-	<!-- Main navbar -->
-	<div class="navbar navbar-dark navbar-static py-2">
-		<div class="container-fluid">
-			<div class="navbar-brand">
-				<a href="{% url 'cyber:login' %}" class="d-inline-flex align-items-center">
-					<img src="{% static 'assets/images/logo_icon.svg' %}" alt="">
-					<img src="{% static 'assets/images/logo_text_light.svg' %}" class="d-none d-sm-inline-block h-16px ms-3" alt="">
-				</a>
-			</div>
-
-			<div class="d-flex justify-content-end align-items-center ms-auto">
-				<ul class="navbar-nav flex-row">
-					<li class="nav-item">
-						<a href="{% url 'cyber:register' %}" class="navbar-nav-link navbar-nav-link-icon rounded ms-1">
-							<div class="d-flex align-items-center mx-md-1">
-								<i class="ph-user-circle-plus"></i>
-								<span class="d-none d-md-inline-block ms-2">Register</span>
-							</div>
-						</a>
-					</li>
-					<li class="nav-item">
-						<a href="{% url 'cyber:login' %}" class="navbar-nav-link navbar-nav-link-icon rounded ms-1">
-							<div class="d-flex align-items-center mx-md-1">
-								<i class="ph-user-circle"></i>
-								<span class="d-none d-md-inline-block ms-2">Login</span>
-							</div>
-						</a>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</div>
-	<!-- /main navbar -->
 
 	<!-- Page content -->
 	<div class="page-content">
@@ -63,52 +31,49 @@
 				<!-- Content area -->
 				<div class="content d-flex justify-content-center align-items-center">
 
-					{% if error %}
-					<div class="alert alert-danger alert-dismissible fade show w-100 position-absolute top-0 start-0 m-0" style="z-index:10">
-						{{ error }}
-						<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-					</div>
-					{% endif %}
-
 					<!-- Login form -->
-					<form class="login-form" method="post" action="{% url 'cyber:login' %}">
+					<form class="login-form" id="login-form" method="post" action="{% url 'cyber:login' %}" novalidate>
 						{% csrf_token %}
 						<div class="card mb-0">
 							<div class="card-body">
 								<div class="text-center mb-3">
-									<div class="d-inline-flex align-items-center justify-content-center mb-4 mt-2">
-										<img src="{% static 'assets/images/logo_icon.svg' %}" class="h-48px" alt="">
-									</div>
-									<h5 class="mb-0">Login to your account</h5>
-									<span class="d-block text-muted">Enter your credentials below</span>
+									<h5 class="mb-0 fw-bold">Cyber Intelligence Platform</h5>
+									<span class="d-block text-muted">Sign in to your account to continue</span>
 								</div>
+
+								{% if error %}
+								<div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+									<i class="ph-warning-circle me-2"></i>{{ error }}
+									<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+								</div>
+								{% endif %}
+
+							<div class="mb-3">
+								<label class="form-label fw-semibold" for="username">Username <span class="text-danger">*</span></label>
+								<div class="form-control-feedback form-control-feedback-start">
+									<input type="text" class="form-control" name="username" id="username" placeholder="Enter your username" autocomplete="username">
+									<div class="form-control-feedback-icon">
+										<i class="ph-user-circle text-muted"></i>
+									</div>
+									<div class="invalid-feedback" id="username-error">Username is required.</div>
+								</div>
+							</div>
+
+							<div class="mb-3">
+								<label class="form-label fw-semibold" for="password">Password <span class="text-danger">*</span></label>
+								<div class="form-control-feedback form-control-feedback-start">
+									<input type="password" class="form-control" name="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+									<div class="form-control-feedback-icon">
+										<i class="ph-lock text-muted"></i>
+									</div>
+									<div class="invalid-feedback" id="password-error">Password is required.</div>
+								</div>
+							</div>
 
 								<div class="mb-3">
-									<label class="form-label">Username</label>
-									<div class="form-control-feedback form-control-feedback-start">
-										<input type="text" class="form-control" name="username" placeholder="Your username" required>
-										<div class="form-control-feedback-icon">
-											<i class="ph-user-circle text-muted"></i>
-										</div>
-									</div>
-								</div>
-
-								<div class="mb-3">
-									<label class="form-label">Password</label>
-									<div class="form-control-feedback form-control-feedback-start">
-										<input type="password" class="form-control" name="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required>
-										<div class="form-control-feedback-icon">
-											<i class="ph-lock text-muted"></i>
-										</div>
-									</div>
-								</div>
-
-								<div class="mb-3">
-									<button type="submit" class="btn btn-primary w-100">Sign in</button>
-								</div>
-
-								<div class="text-center">
-									<a href="{% url 'cyber:register' %}">Don't have an account? Register</a>
+									<button type="submit" class="btn btn-dark-blue w-100">
+										<i class="ph-sign-in me-2"></i>Sign in
+									</button>
 								</div>
 							</div>
 						</div>
@@ -119,11 +84,11 @@
 				<!-- /content area -->
 
 				<!-- Footer -->
-				<div class="navbar navbar-sm navbar-footer border-top">
+				<!-- <div class="navbar navbar-sm navbar-footer border-top">
 					<div class="container-fluid">
 						<span>&copy; {% now "Y" %} Cyber Intelligence Platform</span>
 					</div>
-				</div>
+				</div> -->
 				<!-- /footer -->
 
 			</div>
@@ -134,6 +99,8 @@
 
 	</div>
 	<!-- /page content -->
+
+
 
 </body>
 </html>
