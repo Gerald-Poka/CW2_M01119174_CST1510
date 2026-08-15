@@ -1,0 +1,133 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Register - Cyber Intelligence Platform</title>
+
+	<link href="{% static 'assets/fonts/inter/inter.css' %}" rel="stylesheet" type="text/css">
+	<link href="{% static 'assets/icons/phosphor/styles.min.css' %}" rel="stylesheet" type="text/css">
+	<link href="{% static 'assets/css/ltr/all.min.css' %}" id="stylesheet" rel="stylesheet" type="text/css">
+
+	<script src="{% static 'assets/demo/demo_configurator.js' %}"></script>
+	<script src="{% static 'assets/js/bootstrap/bootstrap.bundle.min.js' %}"></script>
+	<script src="{% static 'assets/js/app.js' %}"></script>
+</head>
+
+<body>
+
+	<!-- Main navbar -->
+	<div class="navbar navbar-dark navbar-static py-2">
+		<div class="container-fluid">
+			<div class="navbar-brand">
+				<a href="{% url 'cyber:login' %}" class="d-inline-flex align-items-center">
+					<img src="{% static 'assets/images/logo_icon.svg' %}" alt="">
+					<img src="{% static 'assets/images/logo_text_light.svg' %}" class="d-none d-sm-inline-block h-16px ms-3" alt="">
+				</a>
+			</div>
+		</div>
+	</div>
+	<!-- /main navbar -->
+
+	<!-- Page content -->
+	<div class="page-content">
+
+		<!-- Main content -->
+		<div class="content-wrapper">
+
+			<!-- Inner content -->
+			<div class="content-inner">
+
+				<!-- Content area -->
+				<div class="content d-flex justify-content-center align-items-center">
+
+					{% if error %}
+					<div class="alert alert-danger alert-dismissible fade show w-100 position-absolute top-0 start-0 m-0" style="z-index:10">
+						{{ error }}
+						<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+					</div>
+					{% elif success %}
+					<div class="alert alert-success alert-dismissible fade show w-100 position-absolute top-0 start-0 m-0" style="z-index:10">
+						{{ success }}
+						<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+					</div>
+					{% endif %}
+
+					<!-- Registration form -->
+					<form class="login-form" method="post" action="{% url 'cyber:register' %}">
+						{% csrf_token %}
+						<div class="card mb-0">
+							<div class="card-body">
+								<div class="text-center mb-3">
+									<div class="d-inline-flex align-items-center justify-content-center mb-4 mt-2">
+										<img src="{% static 'assets/images/logo_icon.svg' %}" class="h-48px" alt="">
+									</div>
+									<h5 class="mb-0">Create an account</h5>
+									<span class="d-block text-muted">Password needs 8+ chars with upper, lower, digit and special char</span>
+								</div>
+
+								<div class="mb-3">
+									<label class="form-label">Username</label>
+									<div class="form-control-feedback form-control-feedback-start">
+										<input type="text" class="form-control" name="username" placeholder="Choose a username" required>
+										<div class="form-control-feedback-icon">
+											<i class="ph-user-circle text-muted"></i>
+										</div>
+									</div>
+								</div>
+
+								<div class="mb-3">
+									<label class="form-label">Password</label>
+									<div class="form-control-feedback form-control-feedback-start">
+										<input type="password" class="form-control" name="password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required>
+										<div class="form-control-feedback-icon">
+											<i class="ph-lock text-muted"></i>
+										</div>
+									</div>
+								</div>
+
+								<div class="mb-3">
+									<label class="form-label">Confirm Password</label>
+									<div class="form-control-feedback form-control-feedback-start">
+										<input type="password" class="form-control" name="confirm_password" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required>
+										<div class="form-control-feedback-icon">
+											<i class="ph-lock text-muted"></i>
+										</div>
+									</div>
+								</div>
+
+								<div class="mb-3">
+									<button type="submit" class="btn btn-primary w-100">Register</button>
+								</div>
+
+								<div class="text-center">
+									<a href="{% url 'cyber:login' %}">Already have an account? Sign in</a>
+								</div>
+							</div>
+						</div>
+					</form>
+					<!-- /registration form -->
+
+				</div>
+				<!-- /content area -->
+
+				<!-- Footer -->
+				<div class="navbar navbar-sm navbar-footer border-top">
+					<div class="container-fluid">
+						<span>&copy; {% now "Y" %} Cyber Intelligence Platform</span>
+					</div>
+				</div>
+				<!-- /footer -->
+
+			</div>
+			<!-- /inner content -->
+
+		</div>
+		<!-- /main content -->
+
+	</div>
+	<!-- /page content -->
+
+</body>
+</html>

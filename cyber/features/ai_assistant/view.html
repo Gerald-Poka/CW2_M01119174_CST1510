@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}AI Assistant - Cyber Intelligence Platform{% endblock %}
+
+{% block page_title %}AI Assistant{% endblock %}
+
+{% block content %}
+
+<div class="card">
+	<div class="card-header d-flex align-items-center">
+		<h5 class="mb-0"><i class="ph-chat-circle me-2"></i>Chat with your assistant</h5>
+	</div>
+	<div class="card-body">
+		{% if error %}
+		<div class="alert alert-danger">{{ error }}</div>
+		{% endif %}
+
+		<div class="chat-history" id="chat-history" style="max-height:520px; overflow-y:auto;">
+			{% if not messages %}
+			<div class="text-center text-muted py-5">
+				<i class="ph-chat-circle ph-3x mb-2"></i>
+				<p class="mb-0">Ask your assistant a question about cyber incidents, IT tickets, dataset metadata, or the audit trail.</p>
+			</div>
+			{% endif %}
+
+			{% for m in messages %}
+			<div class="d-flex mb-3 {% if m.role == 'user' %}justify-content-end{% endif %}">
+				<div class="{% if m.role == 'user' %}bg-primary text-white{% else %}bg-light border{% endif %} rounded p-3" style="max-width:75%; white-space:pre-wrap;">
+					<div class="fw-semibold fs-sm mb-1 opacity-75">{{ m.role|capfirst }}</div>
+					{{ m.content }}
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+
+		<form method="post" class="mt-3">
+			{% csrf_token %}
+			<div class="input-group">
+				<input type="text" name="question" class="form-control" placeholder="Ask your assistant a question..." required>
+				<button type="submit" class="btn btn-primary">
+					<i class="ph-paper-plane-tilt me-2"></i>Send
+				</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ js_view|safe }}
+{% endblock %}

@@ -5,5 +5,12 @@ __pycache__/
 # Virtual environment
 .venv/
 
-# Streamlit secrets
-.streamlit/secrets.toml
+# Environment / secrets
+.env
+
+# Generated reports and logs
+reports/
+gemini_errors.log
+
+# Django local files
+db.sqlite3

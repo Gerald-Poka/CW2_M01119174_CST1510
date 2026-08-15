@@ -1,0 +1,74 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>{% block title %}Cyber Intelligence Platform{% endblock %}</title>
+
+	<!-- Global stylesheets -->
+	<link href="{% static 'assets/fonts/inter/inter.css' %}" rel="stylesheet" type="text/css">
+	<link href="{% static 'assets/icons/phosphor/styles.min.css' %}" rel="stylesheet" type="text/css">
+	<link href="{% static 'assets/css/ltr/all.min.css' %}" id="stylesheet" rel="stylesheet" type="text/css">
+	{% block extra_css %}{% endblock %}
+	<!-- /global stylesheets -->
+
+	<!-- Core JS files -->
+	<script src="{% static 'assets/demo/demo_configurator.js' %}"></script>
+	<script src="{% static 'assets/js/bootstrap/bootstrap.bundle.min.js' %}"></script>
+	<!-- /core JS files -->
+
+	<!-- Theme JS files -->
+	<script src="{% static 'assets/js/app.js' %}"></script>
+	<!-- /theme JS files -->
+</head>
+
+<body>
+
+	<!-- Page content -->
+	<div class="page-content">
+
+		{% include 'partials/sidebar.html' %}
+
+		<!-- Main content -->
+		<div class="content-wrapper">
+
+			{% include 'partials/topbar.html' %}
+
+			<!-- Inner content -->
+			<div class="content-inner">
+
+				{% include 'partials/breadcrumb.html' %}
+
+				<!-- Content area -->
+				<div class="content pt-0">
+
+					{% if messages %}
+					{% for message in messages %}
+					<div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
+						{{ message }}
+						<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+					</div>
+					{% endfor %}
+					{% endif %}
+
+					{% block content %}{% endblock %}
+
+				</div>
+				<!-- /content area -->
+
+				{% include 'partials/footer.html' %}
+
+			</div>
+			<!-- /inner content -->
+
+		</div>
+		<!-- /main content -->
+
+	</div>
+	<!-- /page content -->
+
+	{% block extra_js %}{% endblock %}
+
+</body>
+</html>

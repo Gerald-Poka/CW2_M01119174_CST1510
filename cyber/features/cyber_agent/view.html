@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Cyber Agent - Cyber Intelligence Platform{% endblock %}
+
+{% block page_title %}Cyber Agent{% endblock %}
+
+{% block content %}
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+{% if not agent_text %}
+<div class="card">
+	<div class="card-header d-flex align-items-center">
+		<h6 class="mb-0"><i class="ph-robot me-2"></i>Choose a task</h6>
+	</div>
+	<div class="card-body">
+		<div class="row g-3">
+			<div class="col-lg-4">
+				<div class="card border h-100">
+					<div class="card-body text-center">
+						<i class="ph-eyeglasses ph-2x text-primary mb-2"></i>
+						<h6 class="mb-1">AI Incident Investigator</h6>
+						<p class="text-muted fs-sm mb-3">Investigate a security incident and get an AI-driven analysis and recommended actions.</p>
+						<form method="post">
+							{% csrf_token %}
+							<input type="hidden" name="mode" value="investigate">
+							<input type="text" name="incident_id" class="form-control mb-2" placeholder="Incident ID, e.g. INC-116" required>
+							<button type="submit" class="btn btn-primary w-100">Investigate</button>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4">
+				<div class="card border h-100">
+					<div class="card-body text-center">
+						<i class="ph-chart-line ph-2x text-primary mb-2"></i>
+						<h6 class="mb-1">AI Security Monitoring</h6>
+						<p class="text-muted fs-sm mb-3">Analyze recent data feeds for emerging threats and get a monitoring report.</p>
+						<form method="post">
+							{% csrf_token %}
+							<input type="hidden" name="mode" value="monitoring">
+							<button type="submit" class="btn btn-primary w-100">Run Monitoring</button>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4">
+				<div class="card border h-100">
+					<div class="card-body text-center">
+						<i class="ph-question ph-2x text-primary mb-2"></i>
+						<h6 class="mb-1">Ask the AI Agent</h6>
+						<p class="text-muted fs-sm mb-3">Ask a question and the agent will use its tools to answer.</p>
+						<form method="post">
+							{% csrf_token %}
+							<input type="hidden" name="mode" value="chat">
+							<input type="text" name="question" class="form-control mb-2" placeholder="e.g. Which incident is most critical?" required>
+							<button type="submit" class="btn btn-primary w-100">Ask</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endif %}
+
+{% if agent_text %}
+<div class="card">
+	<div class="card-header d-flex align-items-center">
+		<h6 class="mb-0"><i class="ph-robot me-2"></i>Agent Response</h6>
+		<form method="post" class="ms-auto">
+			{% csrf_token %}
+			<button type="submit" name="mode" value="new" class="btn btn-light btn-sm">New task</button>
+		</form>
+	</div>
+	<div class="card-body">
+		<div style="white-space:pre-wrap;">{{ agent_text }}</div>
+
+		{% if report_available %}
+		<div class="mt-3">
+			<a href="{% url 'cyber:download_report' %}" class="btn btn-primary">
+				<i class="ph-download-simple me-1"></i>Download PDF Report
+			</a>
+		</div>
+		{% endif %}
+	</div>
+</div>
+{% endif %}
+
+{% endblock %}

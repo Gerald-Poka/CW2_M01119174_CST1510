@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard - Cyber Intelligence Platform{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+	{% for message in messages %}
+	<div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show">
+		{{ message }}
+		<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+	</div>
+	{% endfor %}
+{% endif %}
+
+<div class="card">
+	<div class="card-body">
+		<h5 class="fw-semibold">IT and Security Analysis</h5>
+		<p class="mb-0 text-muted">Welcome to your IT &amp; Security Analytics Platform for exploring pre-analyzed cyber incidents, IT tickets, and metadata insights.</p>
+	</div>
+</div>
+
+<div class="nav-tabs-responsive mb-3">
+	<ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+		<li class="nav-item">
+			<a class="nav-link active" data-bs-toggle="tab" href="#tab-incidents" role="tab">Cyber Incidents Analytics</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" data-bs-toggle="tab" href="#tab-tickets" role="tab">IT Tickets Analytics</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" data-bs-toggle="tab" href="#tab-metadata" role="tab">Metadata Analytics</a>
+		</li>
+	</ul>
+</div>
+
+<div class="tab-content">
+
+	<!-- ===================== CYBER INCIDENTS ===================== -->
+	<div class="tab-pane fade show active" id="tab-incidents" role="tabpanel">
+		<div class="card">
+			<div class="card-header d-flex align-items-center">
+				<h5 class="mb-0">Cyber Incidents Analysis</h5>
+				<form method="get" class="ms-auto">
+					<div class="d-flex align-items-center">
+						<input type="hidden" name="priority" value="{{ priority }}">
+						<input type="hidden" name="uploaded_by" value="{{ uploaded_by }}">
+						<label class="form-label me-2 mb-0">Severity</label>
+						<select name="severity" class="form-select" onchange="this.form.submit()">
+							{% for s in severities %}
+							<option value="{{ s }}" {% if s == severity %}selected{% endif %}>{{ s }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</form>
+			</div>
+			<div class="card-body">
+				<div class="row mb-3">
+					<div class="col-lg-3">
+						<div class="card bg-primary bg-opacity-10 border-0">
+							<div class="card-body py-3">
+								<div class="text-muted fs-sm">{{ severity }} Severity Incidents</div>
+								<div class="fw-bold fs-3">{{ incident_count }}</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3">
+						<div class="card bg-success bg-opacity-10 border-0">
+							<div class="card-body py-3">
+								<div class="text-muted fs-sm">Top Category</div>
+								<div class="fw-bold fs-3 text-truncate">{{ incident_top_category }}</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3">
+						<div class="card bg-danger bg-opacity-10 border-0">
+							<div class="card-body py-3">
+								<div class="text-muted fs-sm">Require Immediate Action</div>
+								<div class="fw-bold fs-3">{{ incident_action|length }}</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3">
+						<div class="card bg-warning bg-opacity-10 border-0">
+							<div class="card-body py-3">
+								<div class="text-muted fs-sm">Open / In Progress</div>
+								<div class="fw-bold fs-3">{{ incident_open|add:incident_in_progress }}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row mb-3">
+					<div class="col-lg-6">
+						<div class="card">
+							<div class="card-header"><h6 class="mb-0">Incidents by Category</h6></div>
+							<div class="card-body"><div id="incident-category-chart" style="height:300px"></div></div>
+						</div>
+					</div>
+					<div class="col-lg-6">
+						<div class="card">
+							<div class="card-header"><h6 class="mb-0">Incidents by Status</h6></div>
+							<div class="card-body"><div id="incident-status-chart" style="height:300px"></div></div>
+						</div>
+					</div>
+				</div>
+
+				<h6 class="mb-2">Incidents Requiring Immediate Action</h6>
+				{% if incident_action %}
+				<div class="table-responsive mb-4">
+					<table class="table table-hover">
+						<thead><tr><th>ID</th><th>Timestamp</th><th>Severity</th><th>Category</th><th>Status</th><th>Description</th></tr></thead>
+						<tbody>
+							{% for i in incident_action %}
+							<tr>
+								<td>{{ i.incident_id }}</td>
+								<td>{{ i.timestamp }}</td>
+								<td><span class="badge bg-{% if i.severity == 'Critical' %}danger{% elif i.severity == 'High' %}orange{% elif i.severity == 'Medium' %}warning{% else %}secondary{% endif %}">{{ i.severity }}</span></td>
+								<td>{{ i.category }}</td>
+								<td>{{ i.status }}</td>
+								<td>{{ i.description|truncatechars:60 }}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+				{% else %}
+				<div class="alert alert-info">No incidents requiring immediate action for the {{ severity }} severity level.</div>
+				{% endif %}
+
+				<h6 class="mb-2">{{ severity }} Severity Incidents</h6>
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead><tr><th>ID</th><th>Timestamp</th><th>Severity</th><th>Category</th><th>Status</th><th>Description</th></tr></thead>
+						<tbody>
+							{% for i in filtered_incidents %}
+							<tr>
+								<td>{{ i.incident_id }}</td>
+								<td>{{ i.timestamp }}</td>
+								<td><span class="badge bg-{% if i.severity == 'Critical' %}danger{% elif i.severity == 'High' %}orange{% elif i.severity == 'Medium' %}warning{% else %}secondary{% endif %}">{{ i.severity }}</span></td>
+								<td>{{ i.category }}</td>
+								<td>{{ i.status }}</td>
+								<td>{{ i.description|truncatechars:60 }}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- ===================== IT TICKETS ===================== -->
+	<div class="tab-pane fade" id="tab-tickets" role="tabpanel">
+		<div class="card">
+			<div class="card-header d-flex align-items-center">
+				<h5 class="mb-0">IT Tickets Analysis</h5>
+				<form method="get" class="ms-auto">
+					<div class="d-flex align-items-center">
+						<input type="hidden" name="severity" value="{{ severity }}">
+						<input type="hidden" name="uploaded_by" value="{{ uploaded_by }}">
+						<label class="form-label me-2 mb-0">Priority</label>
+						<select name="priority" class="form-select" onchange="this.form.submit()">
+							{% for p in priorities %}
+							<option value="{{ p }}" {% if p == priority %}selected{% endif %}>{{ p }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</form>
+			</div>
+			<div class="card-body">
+				<div class="row mb-3">
+					<div class="col-lg-3">
+						<div class="card bg-primary bg-opacity-10 border-0">
+							<div class="card-body py-3">
+								<div class="text-muted fs-sm">{{ priority }} Priority Tickets</div>
+								<div class="fw-bold fs-3">{{ ticket_count }}</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3">
+						<div class="card bg-success bg-opacity-10 border-0">
+							<div class="card-body py-3">
+								<div class="text-muted fs-sm">Top Assigned Support</div>
+								<div class="fw-bold fs-3 text-truncate">{{ ticket_top_assignee }}</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3">
+						<div class="card bg-danger bg-opacity-10 border-0">
+							<div class="card-body py-3">
+								<div class="text-muted fs-sm">Require Immediate Action</div>
+								<div class="fw-bold fs-3">{{ ticket_action|length }}</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-3">
+						<div class="card bg-warning bg-opacity-10 border-0">
+							<div class="card-body py-3">
+								<div class="text-muted fs-sm">Open / In Progress</div>
+								<div class="fw-bold fs-3">{{ ticket_open|add:ticket_in_progress }}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="row mb-3">
+					<div class="col-lg-6">
+						<div class="card">
+							<div class="card-header"><h6 class="mb-0">Tickets by Status</h6></div>
+							<div class="card-body"><div id="ticket-status-chart" style="height:300px"></div></div>
+						</div>
+					</div>
+					<div class="col-lg-6">
+						<div class="card">
+							<div class="card-header"><h6 class="mb-0">Tickets by Assignee</h6></div>
+							<div class="card-body"><div id="ticket-assignee-chart" style="height:300px"></div></div>
+						</div>
+					</div>
+				</div>
+
+				<h6 class="mb-2">IT Tickets Requiring Immediate Action</h6>
+				{% if ticket_action %}
+				<div class="table-responsive mb-4">
+					<table class="table table-hover">
+						<thead><tr><th>ID</th><th>Priority</th><th>Status</th><th>Assigned To</th><th>Created</th><th>Description</th></tr></thead>
+						<tbody>
+							{% for t in ticket_action %}
+							<tr>
+								<td>{{ t.ticket_id }}</td>
+								<td><span class="badge bg-{% if t.priority == 'High' or t.priority == 'Critical' %}danger{% elif t.priority == 'Medium' %}warning{% else %}secondary{% endif %}">{{ t.priority }}</span></td>
+								<td>{{ t.status }}</td>
+								<td>{{ t.assigned_to }}</td>
+								<td>{{ t.created_at }}</td>
+								<td>{{ t.description|truncatechars:60 }}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+				{% else %}
+				<div class="alert alert-info">No IT tickets requiring immediate action for the {{ priority }} priority.</div>
+				{% endif %}
+
+				<h6 class="mb-2">{{ priority }} Priority IT Tickets</h6>
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead><tr><th>ID</th><th>Priority</th><th>Status</th><th>Assigned To</th><th>Created</th><th>Resolution (h)</th><th>Description</th></tr></thead>
+						<tbody>
+							{% for t in filtered_tickets %}
+							<tr>
+								<td>{{ t.ticket_id }}</td>
+								<td><span class="badge bg-{% if t.priority == 'High' or t.priority == 'Critical' %}danger{% elif t.priority == 'Medium' %}warning{% else %}secondary{% endif %}">{{ t.priority }}</span></td>
+								<td>{{ t.status }}</td>
+								<td>{{ t.assigned_to }}</td>
+								<td>{{ t.created_at }}</td>
+								<td>{{ t.resolution_time_hours|default:"-" }}</td>
+								<td>{{ t.description|truncatechars:60 }}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- ===================== METADATA ===================== -->
+	<div class="tab-pane fade" id="tab-metadata" role="tabpanel">
+		<div class="card">
+			<div class="card-header d-flex align-items-center">
+				<h5 class="mb-0">Metadata Analysis</h5>
+				<form method="get" class="ms-auto">
+					<div class="d-flex align-items-center">
+						<input type="hidden" name="severity" value="{{ severity }}">
+						<input type="hidden" name="priority" value="{{ priority }}">
+						<label class="form-label me-2 mb-0">Uploaded By</label>
+						<select name="uploaded_by" class="form-select" onchange="this.form.submit()">
+							{% for u in uploaders %}
+							<option value="{{ u }}" {% if u == uploaded_by %}selected{% endif %}>{{ u }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</form>
+			</div>
+			<div class="card-body">
+				<div class="row mb-3">
+					<div class="col-lg-4">
+						<div class="card bg-primary bg-opacity-10 border-0">
+							<div class="card-body py-3">
+								<div class="text-muted fs-sm">Datasets uploaded by {{ uploaded_by }}</div>
+								<div class="fw-bold fs-3">{{ metadata_count }}</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-4">
+						<div class="card bg-success bg-opacity-10 border-0">
+							<div class="card-body py-3">
+								<div class="text-muted fs-sm">Total Rows</div>
+								<div class="fw-bold fs-3">{{ total_rows }}</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-4">
+						<div class="card bg-warning bg-opacity-10 border-0">
+							<div class="card-body py-3">
+								<div class="text-muted fs-sm">Average Dataset Size</div>
+								<div class="fw-bold fs-3">{{ avg_rows }}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				{% if largest %}
+				<div class="card bg-info bg-opacity-10 border-0 mb-3">
+					<div class="card-body py-3">
+						<div class="text-muted fs-sm">Largest Dataset</div>
+						<div class="fw-bold">{{ largest.name }} <span class="text-muted fw-normal">({{ largest.rows }} rows)</span></div>
+					</div>
+				</div>
+				{% endif %}
+
+				<div class="card mb-3">
+					<div class="card-header"><h6 class="mb-0">Dataset Size Comparison for {{ uploaded_by }}</h6></div>
+					<div class="card-body"><div id="metadata-chart" style="height:300px"></div></div>
+				</div>
+
+				<h6 class="mb-2">Metadata Uploads</h6>
+				<div class="table-responsive">
+					<table class="table table-hover">
+						<thead><tr><th>ID</th><th>Name</th><th>Rows</th><th>Columns</th><th>Uploaded By</th><th>Upload Date</th></tr></thead>
+						<tbody>
+							{% for m in filtered_metadata %}
+							<tr>
+								<td>{{ m.dataset_id }}</td>
+								<td>{{ m.name }}</td>
+								<td>{{ m.rows }}</td>
+								<td>{{ m.columns }}</td>
+								<td>{{ m.uploaded_by }}</td>
+								<td>{{ m.upload_date }}</td>
+							</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'assets/js/vendor/visualization/echarts/echarts.min.js' %}"></script>
+<script>const PAGE_DATA = {{ js_data|safe }};</script>
+{{ js_view|safe }}
+{% endblock %}

@@ -2,11 +2,21 @@
 
 ## Introduction
 
-The Cyber Intelligence Platform is a web-based application developed using **Python** and **Streamlit**. It provides an integrated environment for managing cybersecurity incidents, dataset metadata, IT support tickets, and user accounts while incorporating an AI assistant powered by the **Google Gemini API**.
+The Cyber Intelligence Platform is a web-based application developed using
+**Python**, **Django** and **PostgreSQL**. It provides an integrated environment
+for managing cybersecurity incidents, dataset metadata, IT support tickets, and
+user accounts while incorporating an AI assistant powered by the **Google
+Gemini API**.
 
-Beyond the interactive UI, the platform includes an **automated AI monitoring subsystem** (headless) that continuously analyses an external application's audit trail, surfaces cyber issues, stores the resulting analytical reports, and delivers them to the dashboard in near real time.
+Beyond the interactive UI, the platform includes an **automated AI monitoring
+subsystem** (headless) that continuously analyses an external application's
+audit trail, surfaces cyber issues, stores the resulting analytical reports, and
+delivers them to the dashboard in near real time.
 
-The platform demonstrates secure authentication, database management, interactive dashboards, role-based access control, AI-assisted querying of organisational data, and scheduled autonomous monitoring.
+The platform demonstrates secure authentication, database normalisation and
+integrity constraints, interactive dashboards, role-based access control,
+AI-assisted querying of organisational data, and scheduled autonomous
+monitoring.
 
 ---
 
@@ -20,30 +30,42 @@ The platform demonstrates secure authentication, database management, interactiv
 - IT ticket management
 - Interactive dashboards and data visualisation
 - AI assistant capable of answering questions using organisational data
-- SQLite database integration
-- Modular application architecture
+- PostgreSQL database with normalised tables, CHECK constraints and indexes
+- Modular feature-based architecture
 
 ### Automated AI Monitoring (Sentinel Audit Intelligence)
-- **External audit trail ingestion** — imports the monitored application's audit log (Sentinel `sentinel_monitoring.db`, 30,000+ events) into the platform database
-- **Window-based analysis** — the audit is consumed in sliding 100-row windows, one window per scheduled run, simulating near-real-time monitoring of the external system
-- **Large monitoring question pool** — 100+ rotating questions covering the key cyber areas: brute force, data exfiltration, privilege escalation, unauthorised access, malware/ransomware indicators, insider threat, reconnaissance, and overall security posture
-- **Risk assessment** — every answer includes a severity verdict (Normal / Suspicious / Incident) plus recommended actions
-- **Analytical report storage** — each run's question/answer pairs are persisted in the `analytical_reports` table
-- **Scheduled execution** — a Windows Task Scheduler job (`CyberOps_AIMonitor`) triggers the monitor every minute
-- **Live report dashboard** — a dedicated page queries the reports table and auto-refreshes, so new analysis appears as soon as it is generated
-- **Graceful degradation** — API rate limits and outages are logged and skipped without breaking the pipeline
+- **Audit trail analysis** — continuously analyses the monitored application's
+  audit log (30,000+ events) held in the `audit_trail` table
+- **Window-based analysis** — the audit is consumed in sliding 100-row windows,
+  one window per scheduled run, simulating near-real-time monitoring of the
+  external system
+- **Large monitoring question pool** — 100+ rotating questions covering the key
+  cyber areas: brute force, data exfiltration, privilege escalation,
+  unauthorised access, malware/ransomware indicators, insider threat,
+  reconnaissance, and overall security posture
+- **Risk assessment** — every answer includes a severity verdict (Normal /
+  Suspicious / Incident) plus recommended actions
+- **Analytical report storage** — each run's question/answer pairs are persisted
+  in the `analytical_reports` table
+- **Scheduled execution** — a Windows Task Scheduler job triggers the monitor
+  every minute (`python manage.py run_ai_monitor`)
+- **Live report dashboard** — a dedicated page queries the reports table and
+  auto-refreshes, so new analysis appears as soon as it is generated
+- **Graceful degradation** — API rate limits and outages are logged and skipped
+  without breaking the pipeline
 
 ---
 
 ## Technologies Used
 
 - Python 3
-- Streamlit
-- SQLite
-- Pandas
+- Django 6
+- PostgreSQL 18
 - bcrypt
 - Google Gemini API (gemini-2.5-flash)
+- psycopg 3 (PostgreSQL driver)
 - reportlab (PDF reporting)
+- Bootstrap / ECharts (front end)
 - Windows Task Scheduler (automation)
 
 ---
@@ -53,35 +75,34 @@ The platform demonstrates secure authentication, database management, interactiv
 ### High-Level Architecture
 
 ```
-                         ┌────────────────────────────────────────────┐
-                         │         EXTERNAL MONITORED SYSTEM          │
-                         │        (Sentinel – fictional app)          │
-                         │     sentinel_monitoring.db                 │
-                         │     Table: audit_trails (30k+ events)      │
-                         └──────────────────┬─────────────────────────┘
-                                            │ imported on first run
-                                            ▼
-┌────────────────────────────────────────────────────────────────────────────┐
-│                         PYTHON / STREAMLIT PLATFORM                        │
-│                                                                            │
-│  ┌────────────────────┐    ┌───────────────────────────────────────────┐   │
-│  │  Streamlit UI      │    │  AI Monitor (ai_monitor.py – headless)    │   │
-│  │  (pages/*)         │    │                                          │   │
-│  │  Home / Dashboard  │    │ 1. Next 100-row audit window             │   │
-│  │  AI Assistant      │    │ 2. Rotating questions (100+ pool)        │   │
-│  │  Analysis Reports  │    │ 3. Gemini analyses the window            │   │
-│  │  Profile / Admin   │    │ 4. Save Q&A to analytical_reports        │   │
-│  └────────┬───────────┘    └───────────────┬───────────────────────────┘   │
-│           │                                │  scheduled every 1 min       │
-│           │                                │  (Task Scheduler job)         │
-│           ▼                                ▼                              │
-│  ┌─────────────────────────── SQLite (DATA/project_data.db) ──────────┐   │
-│  │ users · cyber_incidents · datasets_metadata · it_tickets           │   │
-│  │ audit_trail · analytical_reports · ai_monitor_state                │   │
-│  └────────────────────────────────────────────────────────────────────┘   │
-│                                                                            │
-│  Gemini API (text-to-SQL + analytical explanations, via st.secrets)        │
-└────────────────────────────────────────────────────────────────────────────┘
+                    ┌────────────────────────────────────────────┐
+                    │       EXTERNAL MONITORED SYSTEM           │
+                    │        (Sentinel – fictional app)         │
+                    │   audit log mirrored into audit_trail     │
+                    └───────────────────┬────────────────────────┘
+                                        │ analysed in sliding 100-row windows
+                                        ▼
+┌───────────────────────────────────────────────────────────────────────────┐
+│                         PYTHON / DJANGO PLATFORM                          │
+│                                                                           │
+│  ┌─────────────────────┐     ┌────────────────────────────────────────┐   │
+│  │  Django web app     │     │  AI Monitor (manage.py run_ai_monitor) │   │
+│  │  cyber/features/*   │     │  headless – scheduled every 1 min      │   │
+│  │  dashboard          │     │  1. Next 100-row audit window          │   │
+│  │  ai_assistant       │     │  2. Rotating questions (100+ pool)     │   │
+│  │  analysis_reports   │     │  3. Gemini analyses the window         │   │
+│  │  profile / admin    │     │  4. Save Q&A to analytical_reports     │   │
+│  │  cyber_agent        │     └─────────────────┬──────────────────────┘   │
+│  └─────────┬───────────┘                       │                          │
+│            │                                   │                          │
+│            ▼                                   ▼                          │
+│  ┌─────────────────────────── PostgreSQL (cyber_intel) ─────────────────┐   │
+│  │ users · cyber_incidents · datasets_metadata · it_tickets            │   │
+│  │ audit_trail · analytical_reports · ai_monitor_state                 │   │
+│  └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                           │
+│  Gemini API (text-to-SQL + analytical explanations, via .env GEMINI_API_KEY)│
+└───────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Data Flow (Automated Monitoring Cycle)
@@ -118,11 +139,12 @@ Analysis Reports page (auto-refreshes every 10 s) displays the latest run
 
 | Layer | Components | Responsibility |
 |---|---|---|
-| Presentation | `Home.py`, `pages/*` | Streamlit UI: dashboards, assistant, reports, admin |
-| Application / Automation | `ai_monitor.py`, `setup_ai_monitor_scheduler.ps1` | Headless monitoring loop + scheduler registration |
-| Domain / Model | `app_model/*` | Data access and business logic for every table |
-| Agent (optional) | `agent_v2/*` | Tool-based Cyber Intelligence Agent (read tools + pending admin actions) |
-| Infrastructure | `DATA/project_data.db`, `.streamlit/secrets.toml`, `configpath.py` | Persistence, secrets, central path configuration |
+| Presentation | `templates/`, `cyber/features/*/view.html`, `static/` | Django templates: dashboards, assistant, reports, admin |
+| Web controllers | `cyber/features/*/index.py`, `cyber/urls.py` | Request routing, auth, session handling |
+| Application / Automation | `cyber/management/commands/run_ai_monitor.py` | Headless monitoring loop |
+| Agent | `cyber/agent/*` | Tool-based Cyber Intelligence Agent (read tools + pending admin actions) |
+| Domain / Model | `cyber/models.py`, `cyber/services.py` | ORM models, data access, business logic |
+| Infrastructure | `config/settings.py`, `.env`, PostgreSQL | Settings, secrets, persistence |
 
 ---
 
@@ -131,100 +153,164 @@ Analysis Reports page (auto-refreshes every 10 s) displays the latest run
 ```
 CW2_M01119174_CST1510/
 │
-├── app_model/
-│   ├── audit_trail.py        # Sentinel audit import + window queries
-│   ├── cyber_incidents.py
-│   ├── db.py                 # SQLite connection
-│   ├── it_tickets.py
-│   ├── metadata.py
-│   ├── reports.py            # analytical_reports store/retrieve
-│   ├── schema.py             # table creation (users, analytical_reports)
-│   └── users.py
+├── manage.py                        # Django CLI entry point
 │
-├── agent_v2/                 # optional tool-based agent
-│   ├── agent.py, investigation.py, monitoring.py, memory.py,
-│   ├── reporting.py, tool_registry.py
-│   └── tools/                # analytics/incident/ticket/metadata/action tools
+├── config/                          # Project configuration package
+│   ├── settings.py                  #   settings + built-in .env loader
+│   ├── urls.py                      #   root URL configuration
+│   ├── wsgi.py                      #   WSGI entry point
+│   ├── asgi.py                      #   ASGI entry point
+│   └── __init__.py
 │
-├── pages/
-│   ├── 1_Dashboard.py
-│   ├── 2_AI_Assistant.py
-│   ├── 3_PROFILE.py
-│   ├── 4_Cyber_Agent.py
-│   ├── 5_ADMIN_MANAGEMENT.py
-│   └── 6_Analysis_Reports.py # live view of AI monitor output
+├── cyber/                           # Main application package
+│   ├── admin.py                     #   Django admin registration
+│   ├── apps.py                      #   app configuration
+│   ├── decorators.py                #   @login_required_custom / @admin_required
+│   ├── gemini_service.py            #   Google Gemini provider wrapper
+│   ├── models.py                    #   7 normalised ORM models
+│   ├── services.py                  #   data access + business logic
+│   ├── tests.py
+│   ├── urls.py                      #   application routes
+│   ├── validators.py                #   custom password validator
+│   ├── migrations/                  #   database schema migrations
+│   │   └── 0001_initial.py
+│   ├── management/
+│   │   └── commands/
+│   │       └── run_ai_monitor.py    #   headless AI monitoring runner
+│   ├── agent/                       #   tool-based Cyber Intelligence Agent
+│   │   ├── agent.py
+│   │   ├── investigation.py
+│   │   ├── monitoring.py
+│   │   ├── reporting.py             #     PDF generation (reportlab)
+│   │   ├── tool_registry.py
+│   │   ├── tools.py
+│   │   └── __init__.py
+│   └── features/                    #   one folder per page
+│       ├── auth/                    #     login / register / logout
+│       │   ├── index.py
+│       │   └── __init__.py
+│       │
+│       ├── dashboard/               #     analytics dashboard
+│       │   ├── index.py             #       controller
+│       │   ├── view.py              #       page data
+│       │   ├── view.html            #       template
+│       │   ├── _js_index.py         #       inline JS source
+│       │   ├── js_view.py           #       inline JS builder
+│       │   └── __init__.py
+│       │
+│       ├── ai_assistant/            #     text-to-SQL assistant
+│       │   ├── index.py
+│       │   ├── view.py
+│       │   ├── view.html
+│       │   ├── _js_index.py
+│       │   ├── js_view.py
+│       │   └── __init__.py
+│       │
+│       ├── analysis_reports/        #     live AI monitor reports
+│       │   ├── index.py  view.py  view.html
+│       │   ├── _js_index.py  js_view.py  __init__.py
+│       │
+│       ├── cyber_agent/             #     tool-based agent UI + PDF download
+│       │   ├── index.py  view.py  view.html
+│       │   ├── _js_index.py  js_view.py  __init__.py
+│       │
+│       ├── profile/                 #     user profile
+│       │   ├── index.py  view.py  view.html
+│       │   ├── _js_index.py  js_view.py  __init__.py
+│       │
+│       └── admin_management/        #     admin-only user/data management
+│           ├── index.py  view.py  view.html
+│           ├── _js_index.py  js_view.py  __init__.py
 │
-├── DATA/
-│   ├── project_data.db       # SQLite database (all tables)
-│   ├── users.txt
-│   ├── cyber_incidents.csv
-│   ├── datasets_metadata.csv
-│   ├── it_tickets.csv
-│   └── audit_trail.csv
+├── templates/                       # Django templates
+│   ├── base.html                    #   base layout (sidebar + topbar + content)
+│   ├── auth/
+│   │   ├── login.html
+│   │   └── register.html
+│   └── partials/                    #   reusable layout partials
+│       ├── sidebar.html
+│       ├── topbar.html
+│       ├── breadcrumb.html
+│       └── footer.html
 │
-├── reports/
-│   ├── ai_monitor.log        # rolling log of every monitor run
-│   └── cyber_ops_report_*.pdf
+├── static/                          # Static assets (Limitless Bootstrap theme)
+│   └── assets/
+│       ├── css/                     #   app.js, custom.js, animate.min.css
+│       ├── js/                      #   application + vendor scripts
+│       ├── scss/                    #   Bootstrap / theme stylesheets
+│       ├── fonts/                   #   icon and web fonts
+│       ├── icons/                   #   icon libraries
+│       ├── images/                  #   images / demo assets
+│       └── demo/                    #   demo data
 │
-├── .streamlit/
-│   └── secrets.toml          # GEMINI_API_KEY (gitignored)
-│
-├── ai_monitor.py             # headless AI analysis runner
-├── setup_ai_monitor_scheduler.ps1
-├── configpath.py             # central path configuration
-├── hashing.py
-├── Home.py
-├── main.py                   # CLI entry point + DB setup/migrations
-├── test_tools.py
-├── text_gemini.py
-└── requirements.txt
+├── reports/                         # Generated PDFs + monitor log (gitignored)
+├── requirements.txt
+├── .env.example                     # Template for the git-ignored .env file
+└── .gitignore
 ```
+
+> `.git/`, `.venv/` and `__pycache__/` are omitted for brevity. Each page folder
+> (`cyber/features/*`) follows the same pattern: `index.py` (controller),
+> `view.py` (data preparation), `view.html` (template), and
+> `js_view.py`/`_js_index.py` (inline JavaScript).
 
 ---
 
 ## Database Design
 
-The SQLite database (`DATA/project_data.db`) contains the following tables.
+The platform runs on a **PostgreSQL** database named `cyber_intel`. The schema
+is normalised: every table has a single primary key, appropriate column types,
+NOT NULL where required, CHECK constraints to enforce valid enum values, and
+indexes on frequently filtered/grouped columns. `audit_trail` deliberately has
+no foreign key to `users` (its `user_id` refers to synthetic identities in the
+source audit log).
 
 ### users
 Stores registered user accounts.
 - `id` (PK, auto-increment)
 - `username` (unique)
 - `password_hash`
-- `role` (`user` / `admin`)
+- `role` (`user` / `admin` — CHECK constraint)
 
 ### cyber_incidents
 Stores cybersecurity incident records.
 - `incident_id` (PK)
 - `timestamp`
-- `severity` (Low / Medium / High / Critical)
+- `severity` (Low / Medium / High / Critical — CHECK constraint)
 - `category`
-- `status` (Open / Resolved / Closed)
+- `status` (Open / In Progress / Resolved / Closed — CHECK constraint)
 - `description`
+- `created_at`
+- Indexes on `severity`, `status`, `category`
 
 ### datasets_metadata
 Stores metadata describing uploaded datasets.
 - `dataset_id` (PK)
 - `name`
-- `rows`
-- `columns`
+- `row_count` (non-negative — CHECK constraint)
+- `column_count` (non-negative — CHECK constraint)
 - `uploaded_by`
 - `upload_date`
+- `created_at`
+- Index on `uploaded_by`
 
 ### it_tickets
 Stores IT support ticket information.
 - `ticket_id` (PK)
-- `priority` (High / Medium / Low)
+- `priority` (Low / Medium / High / Critical — CHECK constraint)
 - `description`
-- `status` (Open / Resolved / Closed)
+- `status` (Open / In Progress / Resolved / Closed / Waiting for User — CHECK constraint)
 - `assigned_to`
 - `created_at`
-- `resolution_time_hours`
+- `resolution_time_hours` (integer, nullable, >= 0 — CHECK constraint)
+- Indexes on `priority`, `status`, `assigned_to`
 
 ### audit_trail
-Mirror of the external (Sentinel) monitored system's audit log. Imported from `sentinel_monitoring.db`. **Contains no labels** — meaning is inferred by the AI from event sequences, volume, timing, and the JSON `metadata`.
+Mirror of the external (Sentinel) monitored system's audit log. **Contains no
+labels** — meaning is inferred by the AI from event sequences, volume, timing,
+and the JSON metadata.
 - `id` (PK)
-- `user_id` (1–30, empty = unauthenticated)
+- `user_id` (1–30, empty = unauthenticated; no FK by design)
 - `action` (e.g. LOGIN, LOGIN_FAILED, VIEW_DOCUMENT, EXPORT_DATA, FILE_ACCESS, OUTBOUND_CONNECTION, PROCESS_ACTIVITY, UPDATE_CONFIG)
 - `resource` (AUTHENTICATION, USER, DOCUMENT, SYSTEM_FILE, NETWORK, API, ...)
 - `method` (GET / POST / PUT / PATCH / DELETE / SYSTEM)
@@ -234,8 +320,9 @@ Mirror of the external (Sentinel) monitored system's audit log. Imported from `s
 - `session_id`
 - `status_code` (200/201/401/404/422/429/500/503/...)
 - `response_time_ms`
-- `metadata` (JSON: device, location, file, hashes, destination, records, normal_activity flag)
+- `metadata` (JSONB: device, location, file, hashes, destination, records, normal_activity flag)
 - `created_at`
+- Indexes on `user_id`, `action`, `created_at`, `session_id`
 
 ### analytical_reports
 Output table of the AI monitor. Every scheduled run inserts one row per answered question.
@@ -244,18 +331,20 @@ Output table of the AI monitor. Every scheduled run inserts one row per answered
 - `question`
 - `answer`
 - `created_at`
+- Index on `run_id`
 
 ### ai_monitor_state
 Persists the monitor's scan cursor so runs are resumable.
 - `key` (PK) — `last_audit_id`, `question_index`
 - `value`
+- `updated_at`
 
 ---
 
 ## Automated AI Monitoring Design
 
 ### How the monitor works
-1. The scheduled task (`CyberOps_AIMonitor`, every 1 minute) launches `ai_monitor.py` using the project virtual environment.
+1. The scheduled task (`CyberOps_AIMonitor`, every 1 minute) runs `python manage.py run_ai_monitor` using the project virtual environment.
 2. The script reads the scan cursor, fetches the **next 100 audit events** from `audit_trail`.
 3. It picks the **next 3 questions** from a rotating pool of **100+ monitoring questions**.
 4. Each question is sent to Gemini together with the 100-event window. Gemini:
@@ -276,21 +365,9 @@ The monitor is configurable through environment variables:
 | `SLEEP_BETWEEN_QUESTIONS` | `3` | Seconds between Gemini calls (rate-limit protection) |
 | `AI_MONITOR_VERBOSE` | `0` | Set to `1` to log the raw window |
 
-### Scheduler
-`setup_ai_monitor_scheduler.ps1` registers the Windows Task Scheduler job:
-
+### Running manually
 ```
-powershell -ExecutionPolicy Bypass -File .\setup_ai_monitor_scheduler.ps1
-```
-
-Useful commands:
-
-```
-schtasks /Query /TN "CyberOps_AIMonitor"            # check status
-schtasks /End /TN "CyberOps_AIMonitor"              # stop current run
-schtasks /Change /TN "CyberOps_AIMonitor" /DISABLE  # pause scheduling
-schtasks /Change /TN "CyberOps_AIMonitor" /ENABLE   # resume scheduling
-schtasks /Delete /TN "CyberOps_AIMonitor" /F        # remove the task
+.\.venv\Scripts\python.exe manage.py run_ai_monitor
 ```
 
 ---
@@ -304,13 +381,11 @@ git clone https://github.com/anel-andrew/CW2_M01119174_CST1510.git
 cd CW2_M01119174_CST1510
 ```
 
-Create a virtual environment:
+Create and activate a virtual environment:
 
 ```bash
 python -m venv .venv
 ```
-
-Activate the virtual environment:
 
 - Windows (PowerShell): `.venv\Scripts\Activate.ps1`
 - macOS/Linux: `source .venv/bin/activate`
@@ -318,44 +393,52 @@ Activate the virtual environment:
 Install the required packages:
 
 ```bash
-pip install -r requirements.txt streamlit pandas google-genai
+pip install -r requirements.txt
 ```
-
-> `google-genai` is required by the AI features. `vnv` and `virtualenv` are optional helper tools for environment management.
 
 ---
 
 ## Configuration
 
-### Gemini API Key
-Create the file `.streamlit/secrets.toml`:
+### Configuration file (.env)
+Create the file `.env` (git-ignored, copy from `.env.example`):
 
-```toml
-GEMINI_API_KEY = "YOUR_API_KEY"
+```
+DJANGO_SECRET_KEY=<your-secret>
+DJANGO_DEBUG=1
+DJANGO_ALLOWED_HOSTS=127.0.0.1,localhost,testserver
+GEMINI_API_KEY=<your-api-key>
+POSTGRES_DB=cyber_intel
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=<your-password>
+POSTGRES_HOST=127.0.0.1
+POSTGRES_PORT=5545
 ```
 
-Do **not** commit this file to GitHub (it is gitignored). The AI monitor can alternatively read the key from the `GEMINI_API_KEY` environment variable.
+Do **not** commit `.env` to GitHub (it is gitignored).
 
-### Sentinel Audit Database (optional)
-The `audit_trail` table is populated automatically from `C:\Users\poka\Downloads\sentinel\sentinel_monitoring.db` (path defined in `configpath.py`). If the file is present, the monitor imports all audit events on first run.
+### Database setup
+With the PostgreSQL server running, apply the schema migrations:
+
+```bash
+python manage.py migrate
+```
+
+The database is already populated with the full dataset (users, cyber
+incidents, datasets, IT tickets, audit trail, and analytical reports).
 
 ---
 
 ## Running the Application
 
-Launch the Streamlit application:
+Launch the Django development server:
 
 ```bash
-streamlit run Home.py
+python manage.py runserver
 ```
 
-or with the venv interpreter:
-
-```bash
-.\.venv\Scripts\streamlit run Home.py
-```
-
-The application opens automatically in your default web browser.
+Then open <http://127.0.0.1:8000/> in your browser. You are redirected to the
+login page.
 
 ---
 
@@ -398,11 +481,8 @@ Administrators can:
 - Reset user passwords
 - Delete users
 - Add cyber incidents
-- Delete cyber incidents
 - Add dataset metadata
-- Delete dataset metadata
 - Add IT tickets
-- Delete IT tickets
 
 ---
 
@@ -413,12 +493,12 @@ The AI Assistant uses the Google Gemini API.
 When a user submits a question:
 
 1. Gemini determines whether the question requires database access.
-2. If required, Gemini generates a SQLite SQL query.
-3. Python executes the SQL query.
+2. If required, Gemini generates a PostgreSQL SQL query.
+3. Python executes the SQL query against PostgreSQL.
 4. The database returns the results.
 5. Gemini explains the results in natural language.
 
-This approach ensures calculations are performed by SQLite rather than by the language model.
+This approach ensures calculations are performed by PostgreSQL rather than by the language model.
 
 ---
 
@@ -427,12 +507,13 @@ This approach ensures calculations are performed by SQLite rather than by the la
 The platform incorporates several security mechanisms:
 
 - Passwords are hashed using bcrypt.
-- API keys are stored securely using Streamlit Secrets.
+- API keys and database credentials are stored in the git-ignored `.env` file.
 - Parameterised SQL queries reduce SQL injection risks.
-- Session State maintains authenticated user sessions.
+- Django sessions maintain authenticated user sessions.
 - Role-based authorisation protects administrator functions.
 - The AI monitor runs headless and only reads data; it never executes write actions automatically.
 - All Gemini failures are logged to `gemini_errors.log` without exposing credentials.
+- Database-level CHECK constraints enforce valid enum values at the source.
 
 ---
 
