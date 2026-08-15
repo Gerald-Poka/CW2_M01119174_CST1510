@@ -10,10 +10,11 @@ print("DB_FILE:", DB_FILE)
 
 from app_model.db import get_connection
 from app_model.users import (register_user, login_user, migrate_users, verify_password, get_user,)
-from app_model.schema import create_user_table
+from app_model.schema import create_user_table, create_analytical_reports_table
 from app_model.metadata import migrate_datasets_metadata
 from app_model.cyber_incidents import migrate_cyber_incidents
 from app_model.it_tickets import migrate_it_tickets 
+from app_model.audit_trail import import_sentinel_audit
 from hashing import generate_hash_password
 import re
     
@@ -24,11 +25,13 @@ def main():
    try:
      conn = get_connection()
      create_user_table(conn)
+     create_analytical_reports_table(conn)
      migrate_users(conn)
     #migrate the data from the csv files to the database
      migrate_cyber_incidents(conn)
      migrate_datasets_metadata(conn)
      migrate_it_tickets(conn)
+     import_sentinel_audit(conn)
    except Exception as e:
         print("Error setting up the database:", e)
         return

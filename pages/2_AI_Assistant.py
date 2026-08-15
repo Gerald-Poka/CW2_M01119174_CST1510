@@ -52,6 +52,22 @@ Columns:
   - columns     : number of columns in the dataset
   - uploaded_by : who uploaded it (e.g. data_scientist, cyber_admin)
   - upload_date : date it was uploaded
+
+TABLE: audit_trail
+Columns:
+  - id               : unique event ID (1, 2, 3, ...)
+  - user_id          : synthetic application user ID (1-30); empty = unauthenticated activity
+  - action           : what happened (e.g. LOGIN, LOGIN_FAILED, VIEW_USER, VIEW_DOCUMENT, DOWNLOAD_DOCUMENT, FILE_ACCESS, EXPORT_DATA, UPDATE_USER, UPDATE_CONFIG, SEARCH, API_REQUEST, OUTBOUND_CONNECTION, PROCESS_ACTIVITY)
+  - resource         : the resource involved (e.g. AUTHENTICATION, USER, DOCUMENT, SYSTEM_FILE, NETWORK, API)
+  - method           : HTTP method (GET/POST/PUT/PATCH/DELETE) or SYSTEM for internal activity
+  - endpoint         : the API endpoint (e.g. /api/login, /api/users/42)
+  - ip_address       : source IP (private 10.x / 192.168.x or documentation ranges)
+  - user_agent       : browser/device/process identifier
+  - session_id       : events in one user session share this id
+  - status_code      : HTTP status (200, 201, 204, 304, 401, 404, 422, 429, 500, 503)
+  - response_time_ms : response time in milliseconds
+  - metadata         : JSON string with extra evidence (device, location, file, destination, records, settings_changed, normal_activity flag)
+  - created_at       : event timestamp (YYYY-MM-DD HH:MM:SS, UTC)
 """
 
 #A function that takes the question asked and converts it into an SQL query

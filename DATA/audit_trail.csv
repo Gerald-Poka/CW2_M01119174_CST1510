@@ -1,0 +1,121 @@
+event_id,timestamp,username,action,resource,outcome,source_ip,severity,category,description
+1,2026-08-01 01:02:00,a.smith,ACCOUNT_LOCKED,VPN_Appliance,Success,185.220.101.3,High,Brute Force,Account locked after repeated authentication failures.
+2,2026-08-01 01:59:00,a.smith,LOGIN_FAILED,VPN_Appliance,Failure,45.33.24.110,High,Brute Force,Repeated failed login attempts observed for this account.
+3,2026-08-01 06:24:00,a.smith,ACCOUNT_LOCKED,VPN_Appliance,Success,185.220.101.3,High,Brute Force,Account locked after repeated authentication failures.
+4,2026-08-01 00:20:00,a.smith,LOGIN_FAILED,VPN_Appliance,Failure,45.33.24.110,High,Brute Force,Repeated failed login attempts observed for this account.
+5,2026-08-01 04:23:00,a.smith,LOGIN_FAILED,VPN_Appliance,Failure,45.33.24.110,High,Brute Force,Repeated failed login attempts observed for this account.
+6,2026-08-01 05:37:00,t.brown,ACCOUNT_LOCKED,VPN_Appliance,Success,45.33.24.110,High,Brute Force,Account locked after repeated authentication failures.
+7,2026-08-01 05:06:00,t.brown,LOGIN_FAILED,VPN_Appliance,Failure,45.33.24.110,Critical,Brute Force,"Multiple failed logins from an external IP, possible brute-force attack."
+8,2026-08-01 06:02:00,t.brown,LOGIN_FAILED,VPN_Appliance,Failure,185.220.101.3,High,Brute Force,Repeated failed login attempts observed for this account.
+9,2026-08-01 01:24:00,a.smith,LOGIN_FAILED,VPN_Appliance,Failure,185.220.101.3,Critical,Brute Force,"Multiple failed logins from an external IP, possible brute-force attack."
+10,2026-08-01 00:52:00,t.brown,LOGIN_FAILED,VPN_Appliance,Failure,45.33.24.110,High,Brute Force,Repeated failed login attempts observed for this account.
+11,2026-08-01 07:18:00,t.brown,LOGIN_FAILED,VPN_Appliance,Failure,185.220.101.3,Critical,Brute Force,"Multiple failed logins from an external IP, possible brute-force attack."
+12,2026-08-01 06:18:00,t.brown,LOGIN_FAILED,VPN_Appliance,Failure,45.33.24.110,High,Brute Force,Repeated failed login attempts observed for this account.
+13,2026-08-01 00:45:00,t.brown,LOGIN_FAILED,VPN_Appliance,Failure,185.220.101.3,Critical,Brute Force,"Multiple failed logins from an external IP, possible brute-force attack."
+14,2026-08-01 01:43:00,a.smith,ACCOUNT_LOCKED,VPN_Appliance,Success,45.33.24.110,High,Brute Force,Account locked after repeated authentication failures.
+15,2026-08-01 02:01:00,t.brown,ACCOUNT_LOCKED,VPN_Appliance,Success,45.33.24.110,High,Brute Force,Account locked after repeated authentication failures.
+16,2026-08-01 07:28:00,a.smith,LOGIN_FAILED,VPN_Appliance,Failure,185.220.101.3,High,Brute Force,Repeated failed login attempts observed for this account.
+17,2026-08-01 03:57:00,t.brown,LOGIN_FAILED,VPN_Appliance,Failure,45.33.24.110,Critical,Brute Force,"Multiple failed logins from an external IP, possible brute-force attack."
+18,2026-08-01 03:06:00,a.smith,LOGIN_FAILED,VPN_Appliance,Failure,185.220.101.3,Critical,Brute Force,"Multiple failed logins from an external IP, possible brute-force attack."
+19,2026-08-01 05:54:00,a.smith,ACCOUNT_LOCKED,VPN_Appliance,Success,45.33.24.110,High,Brute Force,Account locked after repeated authentication failures.
+20,2026-08-01 06:18:00,a.smith,ACCOUNT_LOCKED,VPN_Appliance,Success,45.33.24.110,High,Brute Force,Account locked after repeated authentication failures.
+21,2026-08-01 03:19:00,t.brown,LOGIN_FAILED,VPN_Appliance,Failure,45.33.24.110,Critical,Brute Force,"Multiple failed logins from an external IP, possible brute-force attack."
+22,2026-08-01 02:51:00,a.smith,ACCOUNT_LOCKED,VPN_Appliance,Success,45.33.24.110,High,Brute Force,Account locked after repeated authentication failures.
+23,2026-08-01 06:57:00,t.brown,LOGIN_FAILED,VPN_Appliance,Failure,185.220.101.3,High,Brute Force,Repeated failed login attempts observed for this account.
+24,2026-08-01 00:38:00,a.smith,LOGIN_FAILED,VPN_Appliance,Failure,185.220.101.3,Critical,Brute Force,"Multiple failed logins from an external IP, possible brute-force attack."
+25,2026-08-01 05:40:00,t.brown,LOGIN_FAILED,VPN_Appliance,Failure,185.220.101.3,High,Brute Force,Repeated failed login attempts observed for this account.
+26,2026-08-01 03:59:00,a.smith,ACCOUNT_LOCKED,VPN_Appliance,Success,185.220.101.3,High,Brute Force,Account locked after repeated authentication failures.
+27,2026-08-01 02:11:00,t.brown,LOGIN_FAILED,VPN_Appliance,Failure,185.220.101.3,High,Brute Force,Repeated failed login attempts observed for this account.
+28,2026-08-01 03:29:00,t.brown,ACCOUNT_LOCKED,VPN_Appliance,Success,45.33.24.110,High,Brute Force,Account locked after repeated authentication failures.
+29,2026-08-01 04:25:00,e.martinez,DATA_EXPORT,Finance_DB,Success,10.10.10.200,High,Data Exfiltration,Large volume of data exported to an external destination.
+30,2026-08-01 07:25:00,j.wilson,DATA_EXPORT,Finance_DB,Success,198.51.100.77,High,Data Exfiltration,Large volume of data exported to an external destination.
+31,2026-08-01 06:50:00,svc_backup,DATA_EXPORT,Payroll_DB,Success,203.0.113.50,High,Data Exfiltration,Large volume of data exported to an external destination.
+32,2026-08-01 03:22:00,e.martinez,DATA_EXPORT,Payroll_DB,Success,185.220.101.3,High,Data Exfiltration,Large volume of data exported to an external destination.
+33,2026-08-01 04:48:00,j.wilson,DATA_QUERY_ANOMALY,Finance_DB,Success,198.51.100.77,Critical,Data Exfiltration,Unusual large database query beyond normal profile.
+34,2026-08-01 06:29:00,e.martinez,DATA_EXPORT,Payroll_DB,Denied,10.10.10.45,Medium,Data Exfiltration,Data export attempt blocked by policy.
+35,2026-08-01 03:47:00,j.wilson,DATA_QUERY_ANOMALY,Payroll_DB,Success,10.10.10.12,Critical,Data Exfiltration,Unusual large database query beyond normal profile.
+36,2026-08-01 07:33:00,svc_backup,DATA_EXPORT,Payroll_DB,Denied,185.220.101.3,Medium,Data Exfiltration,Data export attempt blocked by policy.
+37,2026-08-01 04:24:00,j.wilson,DATA_EXPORT,Payroll_DB,Success,172.16.5.5,High,Data Exfiltration,Large volume of data exported to an external destination.
+38,2026-08-01 04:24:00,svc_backup,DATA_EXPORT,Finance_DB,Denied,10.10.20.8,Medium,Data Exfiltration,Data export attempt blocked by policy.
+39,2026-08-01 06:35:00,j.wilson,DATA_QUERY_ANOMALY,Finance_DB,Success,203.0.113.50,Critical,Data Exfiltration,Unusual large database query beyond normal profile.
+40,2026-08-01 04:15:00,j.wilson,DATA_QUERY_ANOMALY,Finance_DB,Success,192.168.1.150,Critical,Data Exfiltration,Unusual large database query beyond normal profile.
+41,2026-08-01 02:07:00,r.davis,PRIVILEGE_CHANGE,Domain_Controller,Denied,10.10.20.33,Medium,Privilege Escalation,Attempt to elevate privileges was denied.
+42,2026-08-01 00:48:00,k.thomas,PRIVILEGE_CHANGE,Domain_Controller,Success,45.33.24.110,High,Privilege Escalation,Account granted elevated privileges.
+43,2026-08-01 06:34:00,k.thomas,PRIVILEGE_CHANGE,Domain_Controller,Success,10.10.10.200,High,Privilege Escalation,Account granted elevated privileges.
+44,2026-08-01 01:10:00,k.thomas,PRIVILEGE_CHANGE,Domain_Controller,Success,45.33.24.110,High,Privilege Escalation,Account granted elevated privileges.
+45,2026-08-01 02:20:00,k.thomas,PRIVILEGE_CHANGE,Domain_Controller,Success,172.16.5.5,High,Privilege Escalation,Account granted elevated privileges.
+46,2026-08-01 01:53:00,k.thomas,PRIVILEGE_CHANGE,Domain_Controller,Denied,10.10.10.200,Medium,Privilege Escalation,Attempt to elevate privileges was denied.
+47,2026-08-01 06:10:00,new.hire,PRIVILEGE_CHANGE,Domain_Controller,Success,172.16.0.77,High,Privilege Escalation,Account granted elevated privileges.
+48,2026-08-01 03:49:00,k.thomas,PRIVILEGE_CHANGE,Domain_Controller,Denied,45.33.24.110,Medium,Privilege Escalation,Attempt to elevate privileges was denied.
+49,2026-08-01 02:11:00,r.davis,PRIVILEGE_CHANGE,Domain_Controller,Success,10.10.10.45,High,Privilege Escalation,Account granted elevated privileges.
+50,2026-08-01 00:15:00,k.thomas,PRIVILEGE_CHANGE,Domain_Controller,Denied,185.220.101.3,Medium,Privilege Escalation,Attempt to elevate privileges was denied.
+51,2026-08-01 05:06:00,c.anderson,MALWARE_DETECTED,Endpoint_01,Success,10.10.10.45,Critical,Malware Activity,Malware signature detected on host.
+52,2026-08-01 05:28:00,c.anderson,DATA_DELETE,Endpoint_02,Success,10.10.10.45,High,Data Integrity,Records deleted from a database table.
+53,2026-08-01 07:25:00,d.williams,MALWARE_DETECTED,Endpoint_01,Success,185.220.101.3,Critical,Malware Activity,Malware signature detected on host.
+54,2026-08-01 02:27:00,m.johnson,MALWARE_DETECTED,Data_Lake,Success,10.10.20.33,Critical,Malware Activity,Malware signature detected on host.
+55,2026-08-01 01:12:00,m.johnson,DATA_DELETE,Data_Lake,Success,10.10.20.33,High,Data Integrity,Records deleted from a database table.
+56,2026-08-01 06:58:00,d.williams,FILE_MODIFY,Endpoint_02,Success,10.10.10.45,High,Ransomware Indicator,Bulk modification of files in a short window.
+57,2026-08-01 05:42:00,d.williams,MALWARE_DETECTED,File_Server_01,Success,172.16.0.77,Critical,Malware Activity,Malware signature detected on host.
+58,2026-08-01 04:04:00,m.johnson,FILE_MODIFY,Endpoint_01,Success,198.51.100.77,High,Ransomware Indicator,Bulk modification of files in a short window.
+59,2026-08-01 00:36:00,svc_monitor,USB_MOUNTED,SIEM_Console,Success,192.168.1.150,Medium,Policy Violation,Removable storage device mounted on endpoint.
+60,2026-08-01 02:12:00,j.wilson,USB_MOUNTED,Email_Gateway,Success,185.220.101.3,Medium,Policy Violation,Removable storage device mounted on endpoint.
+61,2026-08-01 01:16:00,audit.svc,CONFIG_CHANGE,File_Server_01,Denied,192.168.1.101,High,Unauthorized Access,Unapproved configuration change attempted.
+62,2026-08-01 02:12:00,s.lee,CONFIG_CHANGE,Domain_Controller,Denied,10.10.10.200,High,Unauthorized Access,Unapproved configuration change attempted.
+63,2026-08-01 00:30:00,m.johnson,USB_MOUNTED,Finance_DB,Success,10.10.10.200,Medium,Policy Violation,Removable storage device mounted on endpoint.
+64,2026-08-01 01:30:00,audit.svc,FILE_ACCESS,Domain_Controller,Denied,45.33.24.110,High,Unauthorized Access,User attempted to access a file without permission.
+65,2026-08-01 07:27:00,svc_monitor,FILE_ACCESS,Endpoint_02,Denied,10.10.10.12,High,Unauthorized Access,User attempted to access a file without permission.
+66,2026-08-01 03:19:00,m.johnson,FILE_ACCESS,Data_Lake,Denied,192.168.1.101,High,Unauthorized Access,User attempted to access a file without permission.
+67,2026-08-01 02:31:00,audit.svc,CONFIG_CHANGE,SIEM_Console,Denied,104.156.244.180,High,Unauthorized Access,Unapproved configuration change attempted.
+68,2026-08-01 01:24:00,j.wilson,CONFIG_CHANGE,VPN_Appliance,Denied,10.10.20.33,High,Unauthorized Access,Unapproved configuration change attempted.
+69,2026-08-01 05:01:00,a.smith,USB_MOUNTED,SIEM_Console,Success,192.168.1.150,Medium,Policy Violation,Removable storage device mounted on endpoint.
+70,2026-08-01 00:30:00,new.hire,USB_MOUNTED,Production_App,Success,172.16.5.5,Medium,Policy Violation,Removable storage device mounted on endpoint.
+71,2026-08-01 01:25:00,a.smith,ACCOUNT_LOCKED,Production_App,Success,10.10.10.45,High,Brute Force,Account locked after repeated authentication failures.
+72,2026-08-01 00:40:00,s.lee,FILE_ACCESS,Source_Code_Repo,Denied,172.16.5.5,High,Unauthorized Access,User attempted to access a file without permission.
+73,2026-08-01 03:31:00,d.williams,FILE_MODIFY,Endpoint_02,Success,203.0.113.50,High,Ransomware Indicator,Bulk modification of files in a short window.
+74,2026-08-01 05:01:00,a.smith,FILE_MODIFY,Backup_Server,Success,10.10.10.45,High,Ransomware Indicator,Bulk modification of files in a short window.
+75,2026-08-01 05:41:00,admin.ops,DATA_EXPORT,Endpoint_02,Denied,192.168.1.101,Medium,Data Exfiltration,Data export attempt blocked by policy.
+76,2026-08-01 05:47:00,admin.ops,FILE_MODIFY,Email_Gateway,Success,192.168.1.101,Medium,Data Integrity,User modified a file; content changed.
+77,2026-08-01 01:12:00,k.thomas,DATA_EXPORT,Domain_Controller,Success,192.168.1.150,High,Data Exfiltration,Large volume of data exported to an external destination.
+78,2026-08-01 00:09:00,vip.user,MALWARE_DETECTED,Backup_Server,Success,203.0.113.50,Critical,Malware Activity,Malware signature detected on host.
+79,2026-08-01 00:42:00,j.wilson,LOGIN_FAILED,Production_App,Failure,192.168.1.101,Critical,Brute Force,"Multiple failed logins from an external IP, possible brute-force attack."
+80,2026-08-01 03:03:00,s.lee,FILE_ACCESS,Endpoint_02,Success,10.10.20.33,Low,Normal Activity,User accessed a file on the shared resource.
+81,2026-08-01 02:30:00,r.davis,PRIVILEGE_CHANGE,Domain_Controller,Denied,172.16.5.5,Medium,Privilege Escalation,Attempt to elevate privileges was denied.
+82,2026-08-01 06:05:00,k.thomas,SESSION_END,Backup_Server,Success,10.10.10.200,Low,Normal Activity,User session ended normally.
+83,2026-08-01 04:35:00,m.johnson,DATA_DELETE,Source_Code_Repo,Success,172.16.5.5,High,Data Integrity,Records deleted from a database table.
+84,2026-08-01 02:38:00,d.williams,SESSION_END,Endpoint_02,Success,10.10.20.8,Low,Normal Activity,User session ended normally.
+85,2026-08-01 01:04:00,d.williams,CONFIG_CHANGE,SIEM_Console,Success,185.220.101.3,Medium,Configuration Drift,Configuration settings changed on a system.
+86,2026-08-01 02:24:00,k.thomas,FILE_ACCESS,Backup_Server,Success,10.10.20.33,Low,Normal Activity,User accessed a file on the shared resource.
+87,2026-08-01 03:00:00,j.wilson,SYSTEM_RESTART,Source_Code_Repo,Success,198.51.100.77,Medium,Normal Activity,System service or host restarted.
+88,2026-08-01 04:23:00,new.hire,CONFIG_CHANGE,VPN_Appliance,Success,172.16.5.5,Medium,Configuration Drift,Configuration settings changed on a system.
+89,2026-08-01 00:52:00,audit.svc,LOGIN_FAILED,Endpoint_01,Failure,192.168.1.101,Medium,Authentication,Invalid credentials supplied during login attempt.
+90,2026-08-01 00:06:00,admin.ops,LOGIN_FAILED,Payroll_DB,Failure,10.10.20.8,Medium,Authentication,Invalid credentials supplied during login attempt.
+91,2026-08-01 02:19:00,r.davis,DATA_DELETE,SIEM_Console,Success,45.33.24.110,High,Data Integrity,Records deleted from a database table.
+92,2026-08-01 06:06:00,audit.svc,SESSION_END,Production_App,Success,10.10.10.12,Low,Normal Activity,User session ended normally.
+93,2026-08-01 00:43:00,t.brown,LOGIN_FAILED,Production_App,Failure,10.10.10.12,Critical,Brute Force,"Multiple failed logins from an external IP, possible brute-force attack."
+94,2026-08-01 05:03:00,t.brown,PRIVILEGE_CHANGE,Data_Lake,Denied,10.10.20.8,Medium,Privilege Escalation,Attempt to elevate privileges was denied.
+95,2026-08-01 02:42:00,svc_backup,LOGIN_FAILED,Endpoint_02,Failure,10.10.10.200,Medium,Authentication,Invalid credentials supplied during login attempt.
+96,2026-08-01 07:45:00,svc_backup,LOGIN_FAILED,Email_Gateway,Failure,198.51.100.77,Medium,Authentication,Invalid credentials supplied during login attempt.
+97,2026-08-01 05:46:00,d.williams,FILE_MODIFY,CRM_App,Success,10.10.10.200,High,Ransomware Indicator,Bulk modification of files in a short window.
+98,2026-08-01 07:37:00,audit.svc,SESSION_END,Backup_Server,Success,104.156.244.180,Low,Normal Activity,User session ended normally.
+99,2026-08-01 07:58:00,e.martinez,FILE_ACCESS,Endpoint_01,Success,10.10.20.8,Low,Normal Activity,User accessed a file on the shared resource.
+100,2026-08-01 07:00:00,r.davis,DATA_QUERY_ANOMALY,Endpoint_02,Success,172.16.0.77,Critical,Data Exfiltration,Unusual large database query beyond normal profile.
+101,2026-08-01 01:36:00,admin.ops,LOGIN_SUCCESS,Payroll_DB,Success,172.16.0.77,Low,Normal Activity,User successfully authenticated to the system.
+102,2026-08-01 05:47:00,e.martinez,DATA_QUERY_ANOMALY,VPN_Appliance,Success,10.10.20.8,Critical,Data Exfiltration,Unusual large database query beyond normal profile.
+103,2026-08-01 06:04:00,d.williams,DATA_QUERY_ANOMALY,Data_Lake,Success,172.16.5.5,Critical,Data Exfiltration,Unusual large database query beyond normal profile.
+104,2026-08-01 07:24:00,new.hire,LOGIN_FAILED,Email_Gateway,Failure,10.10.20.33,Medium,Authentication,Invalid credentials supplied during login attempt.
+105,2026-08-01 03:04:00,k.thomas,PASSWORD_CHANGE,Endpoint_01,Success,10.10.10.200,Low,Normal Activity,User changed their own password.
+106,2026-08-01 01:59:00,m.johnson,FILE_MODIFY,Source_Code_Repo,Success,10.10.20.33,High,Ransomware Indicator,Bulk modification of files in a short window.
+107,2026-08-01 02:53:00,c.anderson,DATA_EXPORT,Endpoint_01,Success,10.10.10.45,High,Data Exfiltration,Large volume of data exported to an external destination.
+108,2026-08-01 05:33:00,svc_monitor,LOGIN_SUCCESS,Source_Code_Repo,Success,172.16.5.5,Low,Normal Activity,User successfully authenticated to the system.
+109,2026-08-01 02:54:00,m.johnson,SESSION_END,Finance_DB,Success,192.168.1.101,Low,Normal Activity,User session ended normally.
+110,2026-08-01 05:02:00,c.anderson,FILE_ACCESS,HR_System,Denied,10.10.10.45,High,Unauthorized Access,User attempted to access a file without permission.
+111,2026-08-01 03:47:00,svc_backup,DATABASE_QUERY,SIEM_Console,Denied,10.10.10.200,High,Unauthorized Access,Query attempt on a database without authorization.
+112,2026-08-01 03:48:00,d.williams,PRIVILEGE_CHANGE,Data_Lake,Success,203.0.113.50,High,Privilege Escalation,Account granted elevated privileges.
+113,2026-08-01 02:15:00,a.smith,FILE_MODIFY,SIEM_Console,Success,172.16.0.77,Medium,Data Integrity,User modified a file; content changed.
+114,2026-08-01 04:31:00,j.wilson,LOGIN_SUCCESS,CRM_App,Success,172.16.0.77,Low,Normal Activity,User successfully authenticated to the system.
+115,2026-08-01 05:45:00,admin.ops,LOGIN_FAILED,Backup_Server,Failure,192.168.1.150,High,Brute Force,Repeated failed login attempts observed for this account.
+116,2026-08-01 07:19:00,d.williams,DATA_DELETE,SIEM_Console,Denied,192.168.1.101,Medium,Unauthorized Access,Attempt to delete data was blocked.
+117,2026-08-01 02:43:00,audit.svc,ACCOUNT_LOCKED,CRM_App,Success,172.16.0.77,High,Brute Force,Account locked after repeated authentication failures.
+118,2026-08-01 02:36:00,t.brown,SYSTEM_RESTART,Email_Gateway,Success,172.16.0.77,Medium,Normal Activity,System service or host restarted.
+119,2026-08-01 03:19:00,r.davis,DATA_DELETE,Backup_Server,Denied,203.0.113.50,Medium,Unauthorized Access,Attempt to delete data was blocked.
+120,2026-08-01 03:32:00,m.johnson,CONFIG_CHANGE,VPN_Appliance,Denied,192.168.1.101,High,Unauthorized Access,Unapproved configuration change attempted.
