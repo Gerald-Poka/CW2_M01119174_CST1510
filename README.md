@@ -49,8 +49,8 @@ monitoring.
   in the `analytical_reports` table
 - **Scheduled execution** — a Windows Task Scheduler job triggers the monitor
   every minute (`python manage.py run_ai_monitor`)
-- **Live report dashboard** — a dedicated page queries the reports table and
-  auto-refreshes, so new analysis appears as soon as it is generated
+- **Live report dashboard** — a dedicated page lists the report runs and shows
+  the latest answers as soon as they are generated
 - **Graceful degradation** — API rate limits and outages are logged and skipped
   without breaking the pipeline
 
@@ -132,7 +132,7 @@ Insert (run_id, question, answer) into analytical_reports
 Advance cursor → next run starts at event 101, 201, ...
      │
      ▼
-Analysis Reports page (auto-refreshes every 10 s) displays the latest run
+Analysis Reports page lists the latest run (refresh to see new rows)
 ```
 
 ### Layered Design
@@ -449,7 +449,7 @@ login page.
 | Home | Login / Register |
 | Dashboard | Analytics for cyber incidents, IT tickets, and dataset metadata |
 | AI Assistant | Chat interface that converts natural-language questions into SQL, runs them, and explains results (Gemini) |
-| Analysis Reports | Live view of the AI monitor's latest reports (auto-refreshes every 10 s) |
+| Analysis Reports | Live view of the AI monitor's latest reports (select a run; refresh to see new rows) |
 | Profile | User account management |
 | Cyber Agent | Tool-based agent with read tools and admin-confirmed write actions |
 | Admin Management | Admin-only user and data management |
